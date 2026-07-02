@@ -1,0 +1,7 @@
+node_modules/
+dist/
+
+*.log
+
+iteration-1.png
+iteration-2.png
