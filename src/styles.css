@@ -1,3 +1,27 @@
+@font-face {
+  font-family: "HarmonyOS Sans";
+  src: url("/fonts/HarmonyOS Sans.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Zona Pro";
+  src: url("/fonts/ZonaPro-Light.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Zona Pro";
+  src: url("/fonts/ZonaPro-SemiBold.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
 :root {
   color: #111;
   background: #f1f1f1;
@@ -52,9 +76,9 @@ body {
   left: 563px;
   top: 13px;
   color: #5d5d5d;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Zona Pro", sans-serif;
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 300;
   line-height: 1;
   letter-spacing: 0.05em;
 }
@@ -68,9 +92,9 @@ body {
   border-radius: 999px;
   background: #fff;
   color: #7b7b7b;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Zona Pro", sans-serif;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 300;
   line-height: 1;
   letter-spacing: 0.05em;
 }
@@ -102,9 +126,9 @@ body {
   margin-left: 70px;
   margin-bottom: 1px;
   color: #929292;
-  font-family: "Montserrat", sans-serif;
+  font-family: "Zona Pro", sans-serif;
   font-size: 12px;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1;
   letter-spacing: -0.04em;
   white-space: nowrap;
@@ -129,7 +153,7 @@ body {
   padding: 6px 16px;
   border-radius: 999px;
   color: #121212;
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: "HarmonyOS Sans", sans-serif;
   font-size: 16px;
   font-weight: 700;
   line-height: 1;
@@ -233,7 +257,7 @@ body {
 .folder-title-cn {
   margin: 0 0 4px;
   color: #fff;
-  font-family: "Noto Sans SC", sans-serif;
+  font-family: "HarmonyOS Sans", sans-serif;
   font-size: 28px;
   font-weight: 700;
   line-height: 1;
@@ -242,7 +266,7 @@ body {
 
 .folder-title-en {
   color: #fff;
-  font-family: "Outfit", sans-serif;
+  font-family: "Zona Pro", sans-serif;
   font-size: 28px;
   font-weight: 300;
   line-height: 1;
@@ -263,7 +287,7 @@ body {
 }
 
 .folder-tags__count {
-  font-family: "Outfit", sans-serif;
+  font-family: "Zona Pro", sans-serif;
   font-size: 32px;
   font-weight: 600;
   line-height: 0.84;
@@ -273,7 +297,7 @@ body {
 .folder-tags__label {
   position: relative;
   bottom: 2px;
-  font-family: "Outfit", sans-serif;
+  font-family: "Zona Pro", sans-serif;
   font-size: 16px;
   font-weight: 300;
   line-height: 1;
