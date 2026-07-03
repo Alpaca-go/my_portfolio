@@ -1,3 +1,5 @@
+import CollectionShowcase from "./components/CollectionShowcase";
+
 const badgeData = [
   {
     key: "vision",
@@ -67,6 +69,7 @@ function Hero() {
         <FeatureBadge key={item.key} {...item} />
       ))}
       <PortfolioWordmark />
+      <CollectionShowcase />
     </main>
   );
 }
