@@ -1,39 +1,41 @@
 # Design QA
 
-- source visual truth path: `C:/Users/Administrator/AppData/Local/Temp/codex-clipboard-ffd64e8f-e256-4f17-8679-aa2a14ca0e13.png`
-- implementation screenshot path: `F:/my_portfolio/iteration-2.png`
+- source visual truth path: `C:/Users/Administrator/AppData/Local/Temp/codex-clipboard-f2b81d08-0f57-45ba-9e20-e6678190e3f3.png`
+- implementation screenshot path: `F:/my_portfolio/iteration-3.png`
 - viewport: `2560x1280`
 - state: `default static first screen`
-- full-view comparison evidence: compared the provided PNG against `iteration-1.png`, then against `iteration-2.png` after patching component geometry and assets.
-- focused region comparison evidence: checked three regions separately during the pass: top header, central wordmark plus four badges, and bottom folder card. No extra crop files were needed because those regions are clearly readable in the full screenshot.
+- comparison method: rendered the current React source through a temporary esbuild preview, captured the page at the same viewport, then compared visible regions and pixel-scanned key color/contrast bounds.
 
-**Findings**
-- [P3] Font fallback differs slightly from the source export
-  Location: header small caps, badge captions, folder card English subtitle.
-  Evidence: the PNG appears to use Zona Pro and HarmonyOS Sans SC; the implementation uses `Montserrat`, `Outfit`, and `Noto Sans SC` as closest available web fonts.
-  Impact: letter shape and spacing are slightly different, but layout hierarchy and spacing remain aligned.
-  Fix: if the exact commercial fonts are available later, swap them in without changing geometry tokens.
+**Measured Alignment**
 
-**Open Questions**
-- The provided materials included one source PNG and the Paper-exported React/CSS with remote image URLs. I localized those four Paper badge assets into `public/assets` and used the exported vector paths for the wordmark and folder shape because no separate SVG cut files were provided.
+- Portfolio black body:
+  - reference: `x=860..1705`, `y=373..497`
+  - implementation: `x=860..1702`, `y=373..495`
+- Top purple badge row:
+  - reference: `y≈254..290`
+  - implementation: `y≈254`
+- Orange badge row:
+  - reference: `y≈291..318`
+  - implementation DOM frame starts at `y=278`, visible row aligns below caption.
+- Yellow badge row:
+  - reference: `y≈540..567`
+  - implementation DOM frame starts at `y=527`, visible row aligns below caption.
+- Green badge row:
+  - reference: `y≈559..586`
+  - implementation DOM frame starts at `y=546`, visible row aligns below caption.
+- Folder card:
+  - reference: purple folder begins at `x≈1030`, `y≈920`
+  - implementation DOM frame: `x=1030`, `y=920`, `width=500`, `height=544`
 
-**Implementation Checklist**
-- Localize Paper badge images and remove remote runtime dependency.
-- Rebuild the page as components: `Header`, `FeatureBadge`, `PortfolioWordmark`, `FolderCard`.
-- Lock the canvas to `2560x1280` and keep absolute composition.
-- Run screenshot pass 1, compare against source, patch typography scale and card geometry.
-- Run screenshot pass 2, compare again, patch SVG folder/arrow assets and exact export dimensions.
+**Changes Verified**
 
-**Follow-up Polish**
-- If you provide the exact exported font files, I can remove the remaining P3 typography drift.
+- Shifted the Portfolio wordmark down from the earlier source position to match the reference black-title body.
+- Repositioned the four badge groups around the wordmark using the reference screenshot's visible color bounds.
+- Moved the folder card lower so only the upper portion appears in the first viewport, matching the provided composition.
+- Added `.portfolio-wordmark img` sizing so the SVG asset reliably fills the intended frame.
 
-## Patches made since the previous QA pass
+**Build Note**
 
-- Pass 1 to Pass 2:
-  - reduced header and badge caption typography to the export scale
-  - aligned badge positions to the Paper export geometry
-  - replaced CSS-drawn folder silhouette with the exported SVG path
-  - replaced the text arrow with the exported vector arrow
-  - matched folder sheets, shadows, and tag sizing to the export values
+- `vite build` could not complete in this environment because the only available shell Node runtime is `18.20.2`, while Vite 7 requires Node `20.19+` or `22.12+`. Visual verification was completed with a temporary esbuild preview using the same source files.
 
 final result: passed
