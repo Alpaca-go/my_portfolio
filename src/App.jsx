@@ -324,6 +324,11 @@ export default function App() {
     setTransitionCards([]);
     setTransitionActive(false);
 
+    const isCenteredCard = key === "brand";
+    const transitionStartDelay = isCenteredCard ? 0 : 430;
+    const fanRevealDelay = Math.max(transitionStartDelay + 1040, 1320);
+    const transitionClearDelay = fanRevealDelay + 560;
+
     queueTimer(() => {
       const measuredCards = measureCenteredCardTransition();
       setTransitionCards(measuredCards);
@@ -333,7 +338,7 @@ export default function App() {
           setTransitionActive(true);
         });
       });
-    }, 430);
+    }, transitionStartDelay);
 
     queueTimer(() => {
       window.scrollTo(0, 0);
@@ -343,9 +348,12 @@ export default function App() {
     queueTimer(() => {
       setOpeningKey(null);
       setDetailCardsTransitioning(false);
+    }, fanRevealDelay);
+
+    queueTimer(() => {
       setTransitionCards([]);
       setTransitionActive(false);
-    }, 1900);
+    }, transitionClearDelay);
   };
 
   const handleDetailBack = () => {

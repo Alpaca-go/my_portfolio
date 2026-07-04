@@ -1,11 +1,11 @@
 import React from "react";
 
 const carouselCards = [
-  { key: "packaging" },
-  { key: "brand" },
-  { key: "ip" },
-  { key: "illustration" },
-  { key: "visual" }
+  { key: "packaging", number: "01" },
+  { key: "brand", number: "02" },
+  { key: "ip", number: "03" },
+  { key: "illustration", number: "04" },
+  { key: "visual", number: "05" }
 ];
 
 const fanSlots = [
@@ -92,7 +92,10 @@ function FanCard({ virtualIndex, activeIndex }) {
       className={className}
       data-fan-slot={slot}
       data-card-key={card.key}
-    />
+      data-card-number={card.number}
+    >
+      <span className="brand-detail__fan-card-number">{card.number}</span>
+    </div>
   );
 }
 
