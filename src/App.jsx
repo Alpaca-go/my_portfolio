@@ -231,10 +231,10 @@ function measureCenteredCardTransition() {
     targetBoxes[index] ? [{
       from: sourceBox,
       to: targetBoxes[index],
-      fromOpacity: "0",
+      fromOpacity: "0.72",
       targetOpacity: "1",
-      opacityDuration: "180ms",
-      opacityDelayExtra: "90ms"
+      opacityDuration: "100ms",
+      opacityDelayExtra: "20ms"
     }] : []
   ));
 }

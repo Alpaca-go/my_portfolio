@@ -77,9 +77,9 @@ body {
 
 .designer-name {
   position: absolute;
-  left: calc(50% - 641px);
-  top: 0;
-  transform: translateX(-50%);
+  left: 563px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #5d5d5d;
   font-family: "Zona Pro", sans-serif;
   font-size: 14px;
@@ -249,7 +249,7 @@ body {
   bottom: 152px !important;
   rotate: 0deg !important;
   translate: -50% !important;
-  z-index: 8 !important;
+  z-index: 45 !important;
   transform: translateY(0);
   transition:
     left 420ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -420,6 +420,10 @@ body {
 .collection-card:focus-visible .collection-card__panel,
 .collection-card.is-opening .collection-card__panel {
   transform: rotateX(-15deg);
+}
+
+.collection-card.is-opening .collection-card__panel {
+  z-index: 20;
 }
 
 .collection-card.is-closing .collection-card__panel {
