@@ -1,5 +1,23 @@
 import React from "react";
 
+const carouselCards = [
+  { key: "packaging" },
+  { key: "brand" },
+  { key: "ip" },
+  { key: "illustration" },
+  { key: "visual" }
+];
+
+const fanSlots = [
+  "off-left",
+  "outer-left",
+  "inner-left",
+  "center",
+  "inner-right",
+  "outer-right",
+  "off-right"
+];
+
 const topTiles = [
   { className: "brand-detail__tile", style: { width: 225, height: 280 } },
   { className: "brand-detail__tile", style: { width: 225, height: 280 } },
@@ -51,29 +69,62 @@ function BackgroundGrid() {
   );
 }
 
-function FanCards() {
+function getWrappedCard(index) {
+  return carouselCards[((index % carouselCards.length) + carouselCards.length) % carouselCards.length];
+}
+
+function getSlotForVirtualIndex(virtualIndex, activeIndex) {
+  return fanSlots[virtualIndex - activeIndex + 3];
+}
+
+function FanCard({ virtualIndex, activeIndex }) {
+  const card = getWrappedCard(virtualIndex);
+  const slot = getSlotForVirtualIndex(virtualIndex, activeIndex);
+  const className = [
+    "brand-detail__fan-card",
+    slot.includes("outer") ? "brand-detail__fan-card--edge" : "brand-detail__fan-card--motion-target",
+    slot.includes("off") ? "brand-detail__fan-card--hidden" : "",
+    `brand-detail__fan-card--${slot}`
+  ].filter(Boolean).join(" ");
+
   return (
-    <div className="brand-detail__fan" aria-hidden="true">
-      <div className="brand-detail__fan-layer brand-detail__fan-layer--outer">
-        <div className="brand-detail__fan-card brand-detail__fan-card--edge brand-detail__fan-card--outer-left" data-fan-slot="outer-left" />
-        <div className="brand-detail__fan-card brand-detail__fan-card--edge brand-detail__fan-card--outer-right" data-fan-slot="outer-right" />
-      </div>
-      <div className="brand-detail__fan-layer brand-detail__fan-layer--inner">
-        <div className="brand-detail__fan-card brand-detail__fan-card--motion-target brand-detail__fan-card--inner-left" data-fan-slot="inner-left" />
-        <div className="brand-detail__fan-card brand-detail__fan-card--motion-target brand-detail__fan-card--inner-right" data-fan-slot="inner-right" />
-      </div>
-      <div className="brand-detail__fan-card brand-detail__fan-card--motion-target brand-detail__fan-card--center" data-fan-slot="center" />
+    <div
+      className={className}
+      data-fan-slot={slot}
+      data-card-key={card.key}
+    />
+  );
+}
+
+function FanCards({ activeIndex, carouselDirection }) {
+  const classes = [
+    "brand-detail__fan",
+    carouselDirection ? `is-moving-${carouselDirection}` : ""
+  ].filter(Boolean).join(" ");
+  const visibleRange = Array.from({ length: 7 }, (_, index) => activeIndex - 3 + index);
+
+  return (
+    <div className={classes} aria-hidden="true">
+      {visibleRange.map((virtualIndex) => (
+        <FanCard virtualIndex={virtualIndex} activeIndex={activeIndex} key={virtualIndex} />
+      ))}
     </div>
   );
 }
 
-function ArrowButton({ direction }) {
+function ArrowButton({ direction, onClick, disabled = false }) {
   const path = direction === "left"
     ? "m368-480 315 315q11 11 11 27.5T683-109q-12 12-28.5 12T626-109L297-438q-9-9-13-20t-4-22q0-11 4-22t13-20l330-330q12-12 28-11.5t28 12.5q11 12 11.5 28T683-795L368-480Z"
     : "M591-482 276-797q-11-11-11-27.5t11-28.5q12-12 28.5-12t28.5 12l329 329q9 9 13 20t4 22q0 11-4 22t-13 20L332-110q-12 12-28 11.5T276-111q-11-12-11.5-28t11.5-28l315-315Z";
 
   return (
-    <button className={`brand-detail__arrow brand-detail__arrow--${direction}`} aria-label={direction === "left" ? "Previous" : "Next"}>
+    <button
+      className={`brand-detail__arrow brand-detail__arrow--${direction}`}
+      aria-label={direction === "left" ? "Previous card" : "Next card"}
+      onClick={onClick}
+      disabled={disabled}
+      type="button"
+    >
       <svg viewBox="0 -960 960 960" aria-hidden="true">
         <path d={path} fill="#fff" />
       </svg>
@@ -82,6 +133,9 @@ function ArrowButton({ direction }) {
 }
 
 export default function BrandDetailPage({ isVisible = true, isClosing = false, isCardTransitioning = false, onBack }) {
+  const [activeIndex, setActiveIndex] = React.useState(1);
+  const [carouselDirection, setCarouselDirection] = React.useState(null);
+  const carouselTimerRef = React.useRef(null);
   const classes = [
     "brand-detail",
     isVisible ? "is-visible" : "",
@@ -89,14 +143,39 @@ export default function BrandDetailPage({ isVisible = true, isClosing = false, i
     isCardTransitioning ? "is-card-transitioning" : ""
   ].filter(Boolean).join(" ");
 
+  React.useEffect(() => () => {
+    if (carouselTimerRef.current) {
+      window.clearTimeout(carouselTimerRef.current);
+    }
+  }, []);
+
+  const slideCarousel = (direction) => {
+    if (carouselDirection) {
+      return;
+    }
+
+    setCarouselDirection(direction);
+    const step = direction === "next" ? 1 : -1;
+    setActiveIndex((current) => current + step);
+
+    if (carouselTimerRef.current) {
+      window.clearTimeout(carouselTimerRef.current);
+    }
+
+    carouselTimerRef.current = window.setTimeout(() => {
+      setCarouselDirection(null);
+      carouselTimerRef.current = null;
+    }, 780);
+  };
+
   return (
     <main className={classes} aria-hidden={!isVisible}>
       <BackgroundGrid />
       <div className="brand-detail__veil" />
       <section className="brand-detail__content" aria-label="品牌设计">
-        <FanCards />
-        <ArrowButton direction="left" />
-        <ArrowButton direction="right" />
+        <FanCards activeIndex={activeIndex} carouselDirection={carouselDirection} />
+        <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection)} />
+        <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection)} />
         <div className="brand-detail__copy">
           <h1>品牌设计</h1>
           <div className="brand-detail__pill">让品牌拥有清晰的视觉语言</div>
