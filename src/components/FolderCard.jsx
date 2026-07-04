@@ -1,3 +1,4 @@
+import React from "react";
 import "./FolderCard.css";
 
 export default function FolderCard({

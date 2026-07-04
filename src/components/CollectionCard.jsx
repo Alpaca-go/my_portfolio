@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function CollectionCard({
   className = "",
   style,
@@ -7,18 +9,46 @@ export default function CollectionCard({
   tagLabel = "tags",
   tabColor,
   panelGradient,
-  arrow = true
+  arrow = true,
+  isOpening = false,
+  isClosing = false,
+  isDimmed = false,
+  onOpen
 }) {
-  const classes = ["collection-card", className].filter(Boolean).join(" ");
+  const classes = [
+    "collection-card",
+    className,
+    isOpening ? "is-opening" : "",
+    isClosing ? "is-closing" : "",
+    isDimmed ? "is-dimmed" : ""
+  ].filter(Boolean).join(" ");
+
+  const handleKeyDown = (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onOpen?.();
+    }
+  };
 
   return (
-    <section className={classes} style={style}>
+    <section
+      className={classes}
+      style={style}
+      tabIndex={0}
+      role="button"
+      data-card-key={titleEn}
+      onClick={onOpen}
+      onKeyDown={handleKeyDown}
+    >
       <svg className="collection-card__tab" viewBox="0 0 400 288" aria-hidden="true">
         <path
           d="M124.07,0H20C8.95,0,0,8.95,0,20v248c0,11.05,8.95,20,20,20H380c11.05,0,20-8.95,20-20V52c0-11.05-8.95-20-20-20H160l-24.03-26.7c-3.03-3.37-7.36-5.3-11.89-5.3Z"
           fill={tabColor}
         />
       </svg>
+      <div className="collection-card__sheet collection-card__sheet-left" />
+      <div className="collection-card__sheet collection-card__sheet-center" />
+      <div className="collection-card__sheet collection-card__sheet-right" />
       <div className="collection-card__panel" style={{ background: panelGradient }}>
         <div className="collection-card__content">
           <div className="collection-card__titles">
@@ -33,7 +63,7 @@ export default function CollectionCard({
             {arrow ? (
               <div className="collection-card__arrow" aria-hidden="true">
                 <svg viewBox="-80 -1120 1120 1120">
-                  <path d="M683-767.668L226.833-311.501q-10.5 10.5-24.5 10.5t-24.5-10.5q-10.5-10.5-10.5-24.5t10.5-24.5l456.167-456.167H228q-14.875 0-24.932-10.127-10.068-10.115-10.068-25.083 0-14.957 10.068-24.873 10.057-9.917 24.932-9.917h490q14.875 0 24.943 10.057Q753-866.543 753-851.668v490q0 14.875-10.127 24.932-10.115 10.068-25.083 10.068-14.957 0-24.874-10.068-9.917-10.057-9.916-24.932v-406Z" fill="#E3E3E3" />
+                  <path d="M683-767.668L226.833-311.501q-10.5 10.5-24.5 10.5t-24.5-10.5q-10.5-10.5-10.5-24.5t10.5-24.5l456.167-456.167H228q-14.875 0-24.932-10.127-10.068-10.115-10.068-25.083 0-14.957 10.068-24.873 10.057-9.917 24.932-9.917h490q14.875 0 24.943 10.057Q753-866.543 753-851.668v490q0 14.875-10.127 24.932-10.115 10.068-25.083 10.068-14.957 0-24.874-10.068-9.917-10.057-9.916-24.932v-406Z" fill="#FFFFFF" />
                 </svg>
               </div>
             ) : null}

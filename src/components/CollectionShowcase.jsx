@@ -1,3 +1,4 @@
+import React from "react";
 import CollectionCard from "./CollectionCard";
 
 const cards = [
@@ -10,7 +11,7 @@ const cards = [
     style: {
       left: "50%",
       bottom: 0,
-      rotate: "345deg",
+      rotate: "-15deg",
       transformOrigin: "0% 0%",
       translate: "calc(-50% - 384px) -8px"
     }
@@ -44,11 +45,24 @@ const cards = [
   }
 ];
 
-export default function CollectionShowcase() {
+export default function CollectionShowcase({ onCardOpen, openingKey, closingKey }) {
+  const classes = [
+    "collection-showcase",
+    openingKey ? "is-opening" : "",
+    closingKey ? "is-closing" : ""
+  ].filter(Boolean).join(" ");
+
   return (
-    <section className="collection-showcase" aria-label="Collection cards">
+    <section className={classes} aria-label="Collection cards">
       {cards.map((card) => (
-        <CollectionCard key={card.key} {...card} />
+        <CollectionCard
+          key={card.key}
+          {...card}
+          isOpening={openingKey === card.key}
+          isClosing={closingKey === card.key}
+          isDimmed={(openingKey && openingKey !== card.key) || (closingKey && closingKey !== card.key)}
+          onOpen={() => onCardOpen(card.key, card.titleEn)}
+        />
       ))}
     </section>
   );
