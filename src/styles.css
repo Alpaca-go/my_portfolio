@@ -473,6 +473,18 @@ body {
   width: fit-content;
 }
 
+.ip-title__mark {
+  display: inline-block;
+  margin-right: 0.1em;
+  font-family: "HarmonyOS Sans", Arial, sans-serif;
+  font-weight: inherit;
+  letter-spacing: 0;
+  -webkit-text-stroke: 0.012em currentColor;
+  paint-order: stroke fill;
+  transform: scaleX(1.01);
+  transform-origin: left center;
+}
+
 .collection-card__title-en {
   color: #fff;
   font-family: "Zona Pro", sans-serif;
@@ -847,6 +859,14 @@ body {
   line-height: 1;
   letter-spacing: -0.05em;
   white-space: nowrap;
+}
+
+.brand-detail[data-active-card="packaging"] .brand-detail__pill {
+  background: linear-gradient(90deg, #ffe149 0%, #ffc528 100%);
+}
+
+.brand-detail[data-active-card="ip"] .brand-detail__pill {
+  background: linear-gradient(90deg, #ff8b29 0%, #ff6500 100%);
 }
 
 .brand-detail__copy p {

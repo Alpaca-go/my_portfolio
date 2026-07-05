@@ -1,5 +1,18 @@
 import React from "react";
 
+function CollectionTitle({ title }) {
+  if (title !== "IP 设计") {
+    return title;
+  }
+
+  return (
+    <>
+      <span className="ip-title__mark">IP</span>
+      <span>设计</span>
+    </>
+  );
+}
+
 export default function CollectionCard({
   className = "",
   style,
@@ -52,7 +65,9 @@ export default function CollectionCard({
       <div className="collection-card__panel" style={{ background: panelGradient }}>
         <div className="collection-card__content">
           <div className="collection-card__titles">
-            <h2 className="collection-card__title-cn">{titleCn}</h2>
+            <h2 className="collection-card__title-cn">
+              <CollectionTitle title={titleCn} />
+            </h2>
             <div className="collection-card__title-en">{titleEn}</div>
           </div>
           <div className="collection-card__footer">

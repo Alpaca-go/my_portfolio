@@ -135,10 +135,42 @@ function ArrowButton({ direction, onClick, disabled = false }) {
   );
 }
 
-export default function BrandDetailPage({ isVisible = true, isClosing = false, isCardTransitioning = false, onBack }) {
+const detailCopyByKey = {
+  packaging: {
+    title: "包装设计",
+    pill: "从概念到落地，构建完整包装系统",
+    caption: "From concept to production-ready packaging"
+  },
+  brand: {
+    title: "品牌设计",
+    pill: "让品牌拥有清晰的视觉语言",
+    caption: "Turning ideas into memorable visual identities"
+  },
+  ip: {
+    title: "IP 设计",
+    pill: "创造能够持续成长的品牌角色",
+    caption: "Designing characters that grow with brands"
+  }
+};
+
+function DetailTitle({ title }) {
+  if (title !== "IP 设计") {
+    return title;
+  }
+
+  return (
+    <>
+      <span className="ip-title__mark">IP</span>
+      <span>设计</span>
+    </>
+  );
+}
+
+export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, onBack }) {
   const [activeIndex, setActiveIndex] = React.useState(1);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
+  const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
   const classes = [
     "brand-detail",
     isVisible ? "is-visible" : "",
@@ -172,17 +204,19 @@ export default function BrandDetailPage({ isVisible = true, isClosing = false, i
   };
 
   return (
-    <main className={classes} aria-hidden={!isVisible}>
+    <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
       <BackgroundGrid />
       <div className="brand-detail__veil" />
-      <section className="brand-detail__content" aria-label="品牌设计">
+      <section className="brand-detail__content" aria-label={detailCopy.title}>
         <FanCards activeIndex={activeIndex} carouselDirection={carouselDirection} />
         <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection)} />
         <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection)} />
         <div className="brand-detail__copy">
-          <h1>品牌设计</h1>
-          <div className="brand-detail__pill">让品牌拥有清晰的视觉语言</div>
-          <p>Turning ideas into memorable visual identities</p>
+          <h1>
+            <DetailTitle title={detailCopy.title} />
+          </h1>
+          <div className="brand-detail__pill">{detailCopy.pill}</div>
+          <p>{detailCopy.caption}</p>
         </div>
         <button className="brand-detail__down" aria-label="Back to home" onClick={onBack}>
           <svg viewBox="0 -960 960 960" aria-hidden="true">

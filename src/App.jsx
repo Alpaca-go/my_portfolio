@@ -326,6 +326,7 @@ export default function App() {
 
     const isCenteredCard = key === "brand";
     const transitionStartDelay = isCenteredCard ? 0 : 430;
+    const detailRevealDelay = transitionStartDelay + 330;
     const fanRevealDelay = Math.max(transitionStartDelay + 1040, 1320);
     const transitionClearDelay = fanRevealDelay + 560;
 
@@ -343,7 +344,7 @@ export default function App() {
     queueTimer(() => {
       window.scrollTo(0, 0);
       setDetailVisible(true);
-    }, 760);
+    }, detailRevealDelay);
 
     queueTimer(() => {
       setOpeningKey(null);
@@ -422,6 +423,7 @@ export default function App() {
         <Header />
         <Hero onCardOpen={handleCardOpen} openingKey={openingKey} closingKey={closingKey} />
         <BrandDetailPage
+          activeCardKey={selectedCard?.key}
           isVisible={detailVisible}
           isClosing={detailClosing}
           isCardTransitioning={detailCardsTransitioning}
