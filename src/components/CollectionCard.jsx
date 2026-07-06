@@ -16,6 +16,7 @@ function CollectionTitle({ title }) {
 export default function CollectionCard({
   className = "",
   style,
+  isIntroActive = false,
   introDelay = 0,
   titleCn,
   titleEn,
@@ -32,6 +33,7 @@ export default function CollectionCard({
   const classes = [
     "collection-card",
     className,
+    isIntroActive ? "is-intro-active" : "",
     isOpening ? "is-opening" : "",
     isClosing ? "is-closing" : "",
     isDimmed ? "is-dimmed" : ""

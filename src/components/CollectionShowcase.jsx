@@ -47,11 +47,28 @@ const cards = [
 
 export default function CollectionShowcase({ onCardOpen, openingKey, closingKey }) {
   const introStartDelay = 480;
+  const introDuration = 760;
+  const introStepDelay = 180;
   const introDelayOrder = {
     brand: 0,
     packaging: 1,
     ip: 2
   };
+  const [isIntroActive, setIsIntroActive] = React.useState(true);
+
+  React.useEffect(() => {
+    if (openingKey || closingKey) {
+      setIsIntroActive(false);
+      return undefined;
+    }
+
+    const totalIntroTime = introStartDelay + introDuration + introStepDelay * 2;
+    const timer = window.setTimeout(() => {
+      setIsIntroActive(false);
+    }, totalIntroTime);
+
+    return () => window.clearTimeout(timer);
+  }, [openingKey, closingKey]);
 
   const classes = [
     "collection-showcase",
@@ -69,6 +86,7 @@ export default function CollectionShowcase({ onCardOpen, openingKey, closingKey 
           tabColor={card.tabColor}
           panelGradient={card.panelGradient}
           style={card.style}
+          isIntroActive={isIntroActive}
           introDelay={introStartDelay + introDelayOrder[card.key] * 180}
           isOpening={openingKey === card.key}
           isClosing={closingKey === card.key}

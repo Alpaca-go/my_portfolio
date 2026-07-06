@@ -339,9 +339,9 @@ export default function App() {
     setTransitionActive(false);
 
     const isCenteredCard = key === "brand";
-    const transitionStartDelay = isCenteredCard ? 0 : 430;
-    const detailRevealDelay = transitionStartDelay + 330;
-    const fanRevealDelay = Math.max(transitionStartDelay + 1040, 1320);
+    const sideCardSettleDelay = isCenteredCard ? 0 : 480;
+    const detailRevealDelay = sideCardSettleDelay + 330;
+    const fanRevealDelay = Math.max(sideCardSettleDelay + 1040, 1320);
     const transitionClearDelay = fanRevealDelay + 560;
 
     queueTimer(() => {
@@ -353,7 +353,7 @@ export default function App() {
           setTransitionActive(true);
         });
       });
-    }, transitionStartDelay);
+    }, sideCardSettleDelay);
 
     queueTimer(() => {
       window.scrollTo(0, 0);
@@ -399,7 +399,9 @@ export default function App() {
         targetBorderWidth: "5px",
         targetRadius: "18px",
         targetShadow: "0 -2px 7px rgba(0, 0, 0, 0.18)",
-        targetOpacity: "0"
+        targetOpacity: "0",
+        opacityDuration: "120ms",
+        opacityDelayExtra: "40ms"
       }];
     });
 
