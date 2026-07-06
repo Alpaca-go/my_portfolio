@@ -46,6 +46,13 @@ const cards = [
 ];
 
 export default function CollectionShowcase({ onCardOpen, openingKey, closingKey }) {
+  const introStartDelay = 480;
+  const introDelayOrder = {
+    brand: 0,
+    packaging: 1,
+    ip: 2
+  };
+
   const classes = [
     "collection-showcase",
     openingKey ? "is-opening" : "",
@@ -57,7 +64,12 @@ export default function CollectionShowcase({ onCardOpen, openingKey, closingKey 
       {cards.map((card) => (
         <CollectionCard
           key={card.key}
-          {...card}
+          titleCn={card.titleCn}
+          titleEn={card.titleEn}
+          tabColor={card.tabColor}
+          panelGradient={card.panelGradient}
+          style={card.style}
+          introDelay={introStartDelay + introDelayOrder[card.key] * 180}
           isOpening={openingKey === card.key}
           isClosing={closingKey === card.key}
           isDimmed={(openingKey && openingKey !== card.key) || (closingKey && closingKey !== card.key)}

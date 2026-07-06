@@ -42,9 +42,9 @@ function Header() {
   );
 }
 
-function FeatureBadge({ className, icon, caption, text }) {
+function FeatureBadge({ className, icon, caption, text, delay }) {
   return (
-    <section className={className}>
+    <section className={className} style={{ "--badge-delay": `${delay}ms` }}>
       <div className="badge-caption">{caption}</div>
       <div className="badge-row">
         <img className="badge-icon" src={icon} alt="" />
@@ -65,10 +65,24 @@ function PortfolioWordmark() {
 }
 
 function Hero({ onCardOpen, openingKey, closingKey }) {
+  const badgeDelayOrder = {
+    brand: 0,
+    packaging: 1,
+    vision: 2,
+    illustration: 3
+  };
+
   return (
     <main className="hero">
       {badgeData.map((item) => (
-        <FeatureBadge key={item.key} {...item} />
+        <FeatureBadge
+          key={item.key}
+          className={item.className}
+          icon={item.icon}
+          caption={item.caption}
+          text={item.text}
+          delay={badgeDelayOrder[item.key] * 220}
+        />
       ))}
       <PortfolioWordmark />
       <CollectionShowcase onCardOpen={onCardOpen} openingKey={openingKey} closingKey={closingKey} />

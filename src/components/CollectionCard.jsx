@@ -16,6 +16,7 @@ function CollectionTitle({ title }) {
 export default function CollectionCard({
   className = "",
   style,
+  introDelay = 0,
   titleCn,
   titleEn,
   tagCount = "05",
@@ -46,7 +47,7 @@ export default function CollectionCard({
   return (
     <section
       className={classes}
-      style={style}
+      style={{ ...style, "--card-intro-delay": `${introDelay}ms` }}
       tabIndex={0}
       role="button"
       data-card-key={titleEn}
