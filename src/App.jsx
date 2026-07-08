@@ -2,6 +2,16 @@ import React from "react";
 import BrandDetailPage from "./components/BrandDetailPage";
 import CollectionShowcase from "./components/CollectionShowcase";
 
+const brandCarouselImages = [
+  "/assets/brand-carousel-16.png",
+  "/assets/brand-carousel-32.png",
+  "/assets/brand-carousel-44.png",
+  "/assets/brand-carousel-58.png",
+  "/assets/brand-carousel-83.png",
+  "/assets/brand-carousel-05.png",
+  "/assets/brand-carousel-71.png"
+];
+
 const badgeData = [
   {
     key: "vision",
@@ -64,7 +74,7 @@ function PortfolioWordmark() {
   );
 }
 
-function Hero({ onCardOpen, openingKey, closingKey }) {
+function Hero({ onCardOpen, openingKey, closingKey, hideOpeningSheets }) {
   const badgeDelayOrder = {
     brand: 0,
     packaging: 1,
@@ -85,7 +95,12 @@ function Hero({ onCardOpen, openingKey, closingKey }) {
         />
       ))}
       <PortfolioWordmark />
-      <CollectionShowcase onCardOpen={onCardOpen} openingKey={openingKey} closingKey={closingKey} />
+      <CollectionShowcase
+        onCardOpen={onCardOpen}
+        openingKey={openingKey}
+        closingKey={closingKey}
+        hideOpeningSheets={hideOpeningSheets}
+      />
     </main>
   );
 }
@@ -145,6 +160,19 @@ function readMotionBox(element, canvasRect, fallbackRotate = 0) {
   };
 }
 
+function readElementImage(element) {
+  const image = element.querySelector("img");
+
+  if (!image) {
+    return null;
+  }
+
+  return {
+    src: image.getAttribute("src"),
+    alt: image.getAttribute("alt") ?? ""
+  };
+}
+
 function measureFolderSheets(cardLabel) {
   const canvas = document.querySelector(".page-canvas");
   const sourceCard = [...document.querySelectorAll(".collection-card")]
@@ -168,7 +196,10 @@ function measureFolderSheets(cardLabel) {
       return [];
     }
 
-    return [readMotionBox(source, canvasRect)];
+    return [{
+      ...readMotionBox(source, canvasRect),
+      image: readElementImage(source)
+    }];
   });
 }
 
@@ -193,7 +224,10 @@ function measureFanCards() {
       return [];
     }
 
-    return [readMotionBox(target, canvasRect)];
+    return [{
+      ...readMotionBox(target, canvasRect),
+      image: readElementImage(target)
+    }];
   });
 }
 
@@ -233,7 +267,11 @@ function measureCardTransition(cardLabel) {
   const targetBoxes = measureFanCards();
 
   return sourceBoxes.flatMap((sourceBox, index) => (
-    targetBoxes[index] ? [{ from: sourceBox, to: targetBoxes[index] }] : []
+    targetBoxes[index] ? [{
+      from: sourceBox,
+      to: targetBoxes[index],
+      image: sourceBox.image
+    }] : []
   ));
 }
 
@@ -294,7 +332,18 @@ function CardTransitionLayer({ cards, isActive }) {
             "--opacity-delay-extra": card.opacityDelayExtra ?? "220ms",
             "--transition-delay": `${index * 35}ms`
           }}
-        />
+        >
+          {card.image ? (
+            <img
+              className="card-transition-layer__card-image"
+              src={card.image.src}
+              alt={card.image.alt}
+              loading="eager"
+              decoding="sync"
+              fetchPriority="high"
+            />
+          ) : null}
+        </div>
       ))}
     </div>
   );
@@ -309,6 +358,7 @@ export default function App() {
   const [selectedCard, setSelectedCard] = React.useState(null);
   const [transitionCards, setTransitionCards] = React.useState([]);
   const [transitionActive, setTransitionActive] = React.useState(false);
+  const [hideOpeningSheets, setHideOpeningSheets] = React.useState(false);
   const timersRef = React.useRef([]);
 
   const clearTimers = React.useCallback(() => {
@@ -324,6 +374,15 @@ export default function App() {
 
   React.useEffect(() => () => clearTimers(), [clearTimers]);
 
+  React.useEffect(() => {
+    brandCarouselImages.forEach((src) => {
+      const image = new Image();
+      image.decoding = "sync";
+      image.src = src;
+      image.decode?.().catch(() => undefined);
+    });
+  }, []);
+
   const handleCardOpen = (key, cardLabel) => {
     if (openingKey || closingKey || detailVisible || detailClosing) {
       return;
@@ -337,18 +396,20 @@ export default function App() {
     setDetailCardsTransitioning(true);
     setTransitionCards([]);
     setTransitionActive(false);
+    setHideOpeningSheets(false);
 
     const isCenteredCard = key === "brand";
-    const sideCardSettleDelay = isCenteredCard ? 0 : 480;
+    const sideCardSettleDelay = isCenteredCard ? 320 : 480;
     const detailRevealDelay = sideCardSettleDelay + 330;
     const fanRevealDelay = Math.max(sideCardSettleDelay + 1040, 1320);
-    const transitionClearDelay = fanRevealDelay + 560;
 
     queueTimer(() => {
-      const measuredCards = measureCenteredCardTransition();
+      const measuredCards = measureCardTransition(cardLabel);
       setTransitionCards(measuredCards);
 
       window.requestAnimationFrame(() => {
+        setHideOpeningSheets(true);
+
         window.requestAnimationFrame(() => {
           setTransitionActive(true);
         });
@@ -363,12 +424,10 @@ export default function App() {
     queueTimer(() => {
       setOpeningKey(null);
       setDetailCardsTransitioning(false);
-    }, fanRevealDelay);
-
-    queueTimer(() => {
       setTransitionCards([]);
       setTransitionActive(false);
-    }, transitionClearDelay);
+      setHideOpeningSheets(false);
+    }, fanRevealDelay);
   };
 
   const handleDetailBack = () => {
@@ -389,6 +448,7 @@ export default function App() {
       return [{
         from: fanCard,
         to: returnTarget,
+        image: fanCard.image,
         fromBackground: index === 1 ? "#f6f6f6" : "#ddd",
         fromOverlay: index === 1 ? "0" : "0.16",
         fromBorderWidth: "4px",
@@ -411,6 +471,7 @@ export default function App() {
     setDetailCardsTransitioning(true);
     setTransitionCards(reverseCards);
     setTransitionActive(false);
+    setHideOpeningSheets(false);
     window.scrollTo(0, 0);
 
     window.requestAnimationFrame(() => {
@@ -437,7 +498,12 @@ export default function App() {
     <div className="page-shell">
       <div className="page-canvas">
         <Header />
-        <Hero onCardOpen={handleCardOpen} openingKey={openingKey} closingKey={closingKey} />
+        <Hero
+          onCardOpen={handleCardOpen}
+          openingKey={openingKey}
+          closingKey={closingKey}
+          hideOpeningSheets={hideOpeningSheets}
+        />
         <BrandDetailPage
           activeCardKey={selectedCard?.key}
           isVisible={detailVisible}

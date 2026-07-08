@@ -1,11 +1,13 @@
 import React from "react";
 
 const carouselCards = [
-  { key: "packaging", number: "01" },
-  { key: "brand", number: "02" },
-  { key: "ip", number: "03" },
-  { key: "illustration", number: "04" },
-  { key: "visual", number: "05" }
+  { key: "brand-16", number: "01", image: "/assets/brand-carousel-16.png", alt: "Chudao Xiang cuisine brand design" },
+  { key: "brand-32", number: "02", image: "/assets/brand-carousel-32.png", alt: "Yi Ji Liang Fang brand design" },
+  { key: "brand-44", number: "03", image: "/assets/brand-carousel-44.png", alt: "Jointown Aesthetics brand design" },
+  { key: "brand-58", number: "04", image: "/assets/brand-carousel-58.png", alt: "Ming Ji Tang brand design" },
+  { key: "brand-83", number: "05", image: "/assets/brand-carousel-83.png", alt: "WOW YEAH brand design" },
+  { key: "brand-05", number: "06", image: "/assets/brand-carousel-05.png", alt: "668 spicy shrimp brand design" },
+  { key: "brand-71", number: "07", image: "/assets/brand-carousel-71.png", alt: "Feng Tang Tang brand design" }
 ];
 
 const fanSlots = [
@@ -94,7 +96,14 @@ function FanCard({ virtualIndex, activeIndex }) {
       data-card-key={card.key}
       data-card-number={card.number}
     >
-      <span className="brand-detail__fan-card-number">{card.number}</span>
+      <img
+        className="brand-detail__fan-card-image"
+        src={card.image}
+        alt={card.alt}
+        loading="eager"
+        decoding="sync"
+        fetchPriority="high"
+      />
     </div>
   );
 }
@@ -135,6 +144,18 @@ function ArrowButton({ direction, onClick, disabled = false }) {
   );
 }
 
+function CarouselHitZone({ direction, onClick, disabled = false }) {
+  return (
+    <button
+      className={`brand-detail__hit-zone brand-detail__hit-zone--${direction}`}
+      aria-label={direction === "left" ? "Previous card" : "Next card"}
+      onClick={onClick}
+      disabled={disabled}
+      type="button"
+    />
+  );
+}
+
 const detailCopyByKey = {
   packaging: {
     title: "包装设计",
@@ -167,7 +188,7 @@ function DetailTitle({ title }) {
 }
 
 export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, onBack }) {
-  const [activeIndex, setActiveIndex] = React.useState(1);
+  const [activeIndex, setActiveIndex] = React.useState(0);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
   const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
@@ -184,8 +205,22 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
     }
   }, []);
 
+  React.useEffect(() => {
+    if (!isCardTransitioning || isVisible || isClosing) {
+      return;
+    }
+
+    if (carouselTimerRef.current) {
+      window.clearTimeout(carouselTimerRef.current);
+      carouselTimerRef.current = null;
+    }
+
+    setCarouselDirection(null);
+    setActiveIndex(0);
+  }, [isCardTransitioning, isVisible, isClosing]);
+
   const slideCarousel = (direction) => {
-    if (carouselDirection) {
+    if (carouselDirection || isCardTransitioning || isClosing) {
       return;
     }
 
@@ -209,8 +244,10 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
       <div className="brand-detail__veil" />
       <section className="brand-detail__content" aria-label={detailCopy.title}>
         <FanCards activeIndex={activeIndex} carouselDirection={carouselDirection} />
-        <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection)} />
-        <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection)} />
+        <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
+        <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
+        <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
+        <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
         <div className="brand-detail__copy">
           <h1>
             <DetailTitle title={detailCopy.title} />

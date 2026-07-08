@@ -24,10 +24,12 @@ export default function CollectionCard({
   tagLabel = "tags",
   tabColor,
   panelGradient,
+  sheetImages = [],
   arrow = true,
   isOpening = false,
   isClosing = false,
   isDimmed = false,
+  hideSheets = false,
   onOpen
 }) {
   const classes = [
@@ -36,7 +38,8 @@ export default function CollectionCard({
     isIntroActive ? "is-intro-active" : "",
     isOpening ? "is-opening" : "",
     isClosing ? "is-closing" : "",
-    isDimmed ? "is-dimmed" : ""
+    isDimmed ? "is-dimmed" : "",
+    hideSheets ? "is-handoff-hidden" : ""
   ].filter(Boolean).join(" ");
 
   const handleKeyDown = (event) => {
@@ -62,9 +65,24 @@ export default function CollectionCard({
           fill={tabColor}
         />
       </svg>
-      <div className="collection-card__sheet collection-card__sheet-left" />
-      <div className="collection-card__sheet collection-card__sheet-center" />
-      <div className="collection-card__sheet collection-card__sheet-right" />
+      {["left", "center", "right"].map((position, index) => {
+        const image = sheetImages[index];
+
+        return (
+          <div className={`collection-card__sheet collection-card__sheet-${position}`} key={position}>
+            {image ? (
+              <img
+                className="collection-card__sheet-image"
+                src={image.src}
+                alt={image.alt}
+                loading="eager"
+                decoding="sync"
+                fetchPriority="high"
+              />
+            ) : null}
+          </div>
+        );
+      })}
       <div className="collection-card__panel" style={{ background: panelGradient }}>
         <div className="collection-card__content">
           <div className="collection-card__titles">

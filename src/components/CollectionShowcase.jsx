@@ -22,6 +22,11 @@ const cards = [
     titleEn: "Brand Design",
     tabColor: "#AB9AFB",
     panelGradient: "linear-gradient(121.8deg, #9f8cf0 4.71%, #7a65dd 92.19%)",
+    sheetImages: [
+      { src: "/assets/brand-carousel-71.png", alt: "Feng Tang Tang brand design" },
+      { src: "/assets/brand-carousel-16.png", alt: "Chudao Xiang cuisine brand design" },
+      { src: "/assets/brand-carousel-32.png", alt: "Yi Ji Liang Fang brand design" }
+    ],
     style: {
       left: "50%",
       bottom: 152,
@@ -45,7 +50,7 @@ const cards = [
   }
 ];
 
-export default function CollectionShowcase({ onCardOpen, openingKey, closingKey }) {
+export default function CollectionShowcase({ onCardOpen, openingKey, closingKey, hideOpeningSheets = false }) {
   const introStartDelay = 480;
   const introDuration = 760;
   const introStepDelay = 180;
@@ -85,11 +90,13 @@ export default function CollectionShowcase({ onCardOpen, openingKey, closingKey 
           titleEn={card.titleEn}
           tabColor={card.tabColor}
           panelGradient={card.panelGradient}
+          sheetImages={card.sheetImages}
           style={card.style}
           isIntroActive={isIntroActive}
           introDelay={introStartDelay + introDelayOrder[card.key] * 180}
           isOpening={openingKey === card.key}
           isClosing={closingKey === card.key}
+          hideSheets={hideOpeningSheets && openingKey === card.key}
           isDimmed={(openingKey && openingKey !== card.key) || (closingKey && closingKey !== card.key)}
           onOpen={() => onCardOpen(card.key, card.titleEn)}
         />

@@ -304,7 +304,7 @@ body {
 
 .collection-card.is-opening[data-card-key="Brand Design"] {
   transition: none;
-  animation: collection-card-fade-down 760ms cubic-bezier(0.35, 0, 0.2, 1) forwards;
+  animation: collection-card-fade-down 520ms 320ms cubic-bezier(0.35, 0, 0.2, 1) forwards;
 }
 
 .collection-card.is-closing {
@@ -372,12 +372,20 @@ body {
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 -2px 7px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
   transform: translateX(-50%) rotate(0deg);
   transform-origin: center center;
   transition:
     top 620ms 120ms cubic-bezier(0.19, 1, 0.22, 1),
     transform 620ms 120ms cubic-bezier(0.19, 1, 0.22, 1);
   will-change: top, transform;
+}
+
+.collection-card__sheet-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .collection-card__sheet-left {
@@ -416,8 +424,8 @@ body {
 
 .collection-card.is-opening .collection-card__sheet {
   transition:
-    top 420ms cubic-bezier(0.19, 1, 0.22, 1),
-    transform 420ms cubic-bezier(0.19, 1, 0.22, 1);
+    top 320ms cubic-bezier(0.19, 1, 0.22, 1),
+    transform 320ms cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 .collection-card.is-opening .collection-card__sheet-left {
@@ -440,6 +448,11 @@ body {
 
 .collection-card.is-opening .collection-card__sheet {
   visibility: visible;
+}
+
+.collection-card.is-handoff-hidden .collection-card__sheet {
+  opacity: 0;
+  visibility: hidden;
 }
 
 .collection-card.is-closing .collection-card__sheet {
@@ -676,6 +689,19 @@ body {
   will-change: left, top, width, height, rotate;
 }
 
+.brand-detail__fan-card--motion-target {
+  transition:
+    left 780ms cubic-bezier(0.16, 1, 0.3, 1),
+    top 780ms cubic-bezier(0.16, 1, 0.3, 1),
+    width 780ms cubic-bezier(0.16, 1, 0.3, 1),
+    height 780ms cubic-bezier(0.16, 1, 0.3, 1),
+    rotate 780ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0ms,
+    filter 520ms ease,
+    background-color 520ms ease,
+    box-shadow 520ms ease;
+}
+
 .brand-detail__fan-card::after {
   content: "";
   position: absolute;
@@ -683,6 +709,13 @@ body {
   border-radius: inherit;
   background: rgba(0, 0, 0, var(--card-overlay-alpha, 0));
   pointer-events: none;
+}
+
+.brand-detail__fan-card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .brand-detail__fan-card-number {
@@ -722,6 +755,14 @@ body {
 
 .brand-detail.is-card-transitioning .brand-detail__fan-card--motion-target {
   opacity: 0;
+}
+
+.brand-detail.is-closing .brand-detail__fan-card {
+  opacity: 0;
+  transition:
+    opacity 0ms,
+    filter 0ms,
+    box-shadow 0ms;
 }
 
 .brand-detail__fan-card--hidden {
@@ -807,6 +848,7 @@ body {
 .brand-detail__arrow {
   position: absolute;
   top: 472px;
+  z-index: 12;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -850,6 +892,31 @@ body {
 .brand-detail__arrow svg {
   width: 48px;
   height: 48px;
+}
+
+.brand-detail__hit-zone {
+  position: absolute;
+  top: 300px;
+  z-index: 10;
+  width: 420px;
+  height: 460px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.brand-detail__hit-zone:disabled {
+  cursor: default;
+  pointer-events: none;
+}
+
+.brand-detail__hit-zone--left {
+  left: 700px;
+}
+
+.brand-detail__hit-zone--right {
+  left: 1440px;
 }
 
 .brand-detail__copy {
@@ -969,7 +1036,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 35;
+  z-index: 55;
   isolation: isolate;
 }
 
@@ -1007,6 +1074,13 @@ body {
   opacity: 1;
   pointer-events: none;
   transition: background 520ms calc(var(--transition-delay) + 260ms) ease;
+}
+
+.card-transition-layer__card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .card-transition-layer.is-active .card-transition-layer__card {
