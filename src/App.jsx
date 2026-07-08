@@ -1,6 +1,7 @@
 import React from "react";
 import BrandDetailPage from "./components/BrandDetailPage";
 import CollectionShowcase from "./components/CollectionShowcase";
+import ChudaoDetailPage from "./components/FengTangDetailPage";
 
 const brandCarouselImages = [
   "/assets/brand-carousel-16.png",
@@ -10,6 +11,19 @@ const brandCarouselImages = [
   "/assets/brand-carousel-83.png",
   "/assets/brand-carousel-05.png",
   "/assets/brand-carousel-71.png"
+];
+
+const chudaoDetailImages = [
+  "/assets/feng-tang-detail/hero-poster.png",
+  "/assets/feng-tang-detail/brand-identity.png",
+  "/assets/feng-tang-detail/brand-overview.png",
+  "/assets/feng-tang-detail/dish-logo.png",
+  "/assets/feng-tang-detail/typography.png",
+  "/assets/feng-tang-detail/poster-series.png",
+  "/assets/feng-tang-detail/auxiliary-graphics.png",
+  "/assets/feng-tang-detail/package-boxes.png",
+  "/assets/feng-tang-detail/package-labels.png",
+  "/assets/feng-tang-detail/storefront.png"
 ];
 
 const badgeData = [
@@ -291,6 +305,39 @@ function measureCenteredCardTransition() {
   ));
 }
 
+function measureChudaoProjectTransition() {
+  const canvas = document.querySelector(".page-canvas");
+  const source = document.querySelector("[data-card-key='brand-16'][data-fan-slot='center']");
+
+  if (!canvas || !source) {
+    return [];
+  }
+
+  const canvasRect = canvas.getBoundingClientRect();
+
+  return [{
+    from: readMotionBox(source, canvasRect),
+    to: {
+      left: 1050,
+      top: 360,
+      width: 460,
+      height: 280,
+      rotate: 0
+    },
+    image: readElementImage(source),
+    fromBackground: "#f6f6f6",
+    fromOverlay: "0",
+    fromBorderWidth: "4px",
+    fromRadius: "32px",
+    fromShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
+    targetBackground: "#ddd",
+    targetOverlay: "0",
+    targetBorderWidth: "0px",
+    targetRadius: "20px",
+    targetShadow: "none"
+  }];
+}
+
 function CardTransitionLayer({ cards, isActive }) {
   if (!cards.length) {
     return null;
@@ -359,6 +406,8 @@ export default function App() {
   const [transitionCards, setTransitionCards] = React.useState([]);
   const [transitionActive, setTransitionActive] = React.useState(false);
   const [hideOpeningSheets, setHideOpeningSheets] = React.useState(false);
+  const [projectDetail, setProjectDetail] = React.useState(null);
+  const [projectTransitioning, setProjectTransitioning] = React.useState(false);
   const timersRef = React.useRef([]);
 
   const clearTimers = React.useCallback(() => {
@@ -375,7 +424,7 @@ export default function App() {
   React.useEffect(() => () => clearTimers(), [clearTimers]);
 
   React.useEffect(() => {
-    brandCarouselImages.forEach((src) => {
+    [...brandCarouselImages, ...chudaoDetailImages].forEach((src) => {
       const image = new Image();
       image.decoding = "sync";
       image.src = src;
@@ -389,6 +438,8 @@ export default function App() {
     }
 
     clearTimers();
+    setProjectDetail(null);
+    setProjectTransitioning(false);
 
     setSelectedCard({ key, label: cardLabel });
     setDetailClosing(false);
@@ -436,6 +487,8 @@ export default function App() {
     }
 
     clearTimers();
+    setProjectDetail(null);
+    setProjectTransitioning(false);
     const fanCards = measureFanCards();
     const returnTargets = measureCenterFolderStack();
     const reverseCards = fanCards.flatMap((fanCard, index) => {
@@ -494,6 +547,40 @@ export default function App() {
     }, 700);
   };
 
+  const handleChudaoOpen = () => {
+    if (projectDetail || projectTransitioning || detailCardsTransitioning || detailClosing) {
+      return;
+    }
+
+    clearTimers();
+
+    const projectCards = measureChudaoProjectTransition();
+
+    if (!projectCards.length) {
+      setProjectDetail("chudao");
+      return;
+    }
+
+    setDetailCardsTransitioning(true);
+    setProjectTransitioning(true);
+    setTransitionCards(projectCards);
+    setTransitionActive(false);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setTransitionActive(true);
+      });
+    });
+
+    queueTimer(() => {
+      setProjectDetail("chudao");
+      setProjectTransitioning(false);
+      setDetailCardsTransitioning(false);
+      setTransitionCards([]);
+      setTransitionActive(false);
+    }, 920);
+  };
+
   return (
     <div className="page-shell">
       <div className="page-canvas">
@@ -509,9 +596,14 @@ export default function App() {
           isVisible={detailVisible}
           isClosing={detailClosing}
           isCardTransitioning={detailCardsTransitioning}
+          isProjectTransitioning={projectTransitioning}
           onBack={handleDetailBack}
+          onChudaoOpen={handleChudaoOpen}
         />
         <CardTransitionLayer cards={transitionCards} isActive={transitionActive} />
+        {projectDetail === "chudao" ? (
+          <ChudaoDetailPage onBack={() => setProjectDetail(null)} />
+        ) : null}
       </div>
     </div>
   );

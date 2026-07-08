@@ -1,4 +1,5 @@
 import React from "react";
+import FengTangGrid from "./FengTangGrid";
 
 const carouselCards = [
   { key: "brand-16", number: "01", image: "/assets/brand-carousel-16.png", alt: "Chudao Xiang cuisine brand design" },
@@ -79,15 +80,26 @@ function getSlotForVirtualIndex(virtualIndex, activeIndex) {
   return fanSlots[virtualIndex - activeIndex + 3];
 }
 
-function FanCard({ virtualIndex, activeIndex }) {
+function FanCard({ virtualIndex, activeIndex, onChudaoOpen, isInteractionDisabled }) {
   const card = getWrappedCard(virtualIndex);
   const slot = getSlotForVirtualIndex(virtualIndex, activeIndex);
+  const isChudaoCenter = card.key === "brand-16" && slot === "center";
+  const isClickable = isChudaoCenter && !isInteractionDisabled;
   const className = [
     "brand-detail__fan-card",
     slot.includes("outer") ? "brand-detail__fan-card--edge" : "brand-detail__fan-card--motion-target",
     slot.includes("off") ? "brand-detail__fan-card--hidden" : "",
+    isClickable ? "brand-detail__fan-card--clickable" : "",
     `brand-detail__fan-card--${slot}`
   ].filter(Boolean).join(" ");
+  const handleKeyDown = (event) => {
+    if (!isClickable || (event.key !== "Enter" && event.key !== " ")) {
+      return;
+    }
+
+    event.preventDefault();
+    onChudaoOpen?.();
+  };
 
   return (
     <div
@@ -95,6 +107,11 @@ function FanCard({ virtualIndex, activeIndex }) {
       data-fan-slot={slot}
       data-card-key={card.key}
       data-card-number={card.number}
+      role={isChudaoCenter ? "button" : undefined}
+      tabIndex={isClickable ? 0 : undefined}
+      aria-label={isChudaoCenter ? "Open Chudao Xiang cuisine project detail" : undefined}
+      onClick={isClickable ? onChudaoOpen : undefined}
+      onKeyDown={handleKeyDown}
     >
       <img
         className="brand-detail__fan-card-image"
@@ -108,7 +125,7 @@ function FanCard({ virtualIndex, activeIndex }) {
   );
 }
 
-function FanCards({ activeIndex, carouselDirection }) {
+function FanCards({ activeIndex, carouselDirection, onChudaoOpen, isInteractionDisabled }) {
   const classes = [
     "brand-detail__fan",
     carouselDirection ? `is-moving-${carouselDirection}` : ""
@@ -116,9 +133,15 @@ function FanCards({ activeIndex, carouselDirection }) {
   const visibleRange = Array.from({ length: 7 }, (_, index) => activeIndex - 3 + index);
 
   return (
-    <div className={classes} aria-hidden="true">
+    <div className={classes}>
       {visibleRange.map((virtualIndex) => (
-        <FanCard virtualIndex={virtualIndex} activeIndex={activeIndex} key={virtualIndex} />
+        <FanCard
+          virtualIndex={virtualIndex}
+          activeIndex={activeIndex}
+          isInteractionDisabled={isInteractionDisabled}
+          onChudaoOpen={onChudaoOpen}
+          key={virtualIndex}
+        />
       ))}
     </div>
   );
@@ -187,16 +210,20 @@ function DetailTitle({ title }) {
   );
 }
 
-export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, onBack }) {
+export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, onBack, onChudaoOpen }) {
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
   const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
+  const centerCard = getWrappedCard(activeIndex);
+  const isChudaoActive = centerCard.key === "brand-16";
+  const isInteractionDisabled = Boolean(carouselDirection || isCardTransitioning || isClosing);
   const classes = [
     "brand-detail",
     isVisible ? "is-visible" : "",
     isClosing ? "is-closing" : "",
-    isCardTransitioning ? "is-card-transitioning" : ""
+    isCardTransitioning ? "is-card-transitioning" : "",
+    isProjectTransitioning ? "is-project-transitioning" : ""
   ].filter(Boolean).join(" ");
 
   React.useEffect(() => () => {
@@ -240,14 +267,19 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
 
   return (
     <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
-      <BackgroundGrid />
+      {isChudaoActive ? <FengTangGrid className="feng-grid--brand-background" hidden /> : <BackgroundGrid />}
       <div className="brand-detail__veil" />
       <section className="brand-detail__content" aria-label={detailCopy.title}>
-        <FanCards activeIndex={activeIndex} carouselDirection={carouselDirection} />
-        <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
-        <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
-        <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
-        <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={Boolean(carouselDirection || isCardTransitioning || isClosing)} />
+        <FanCards
+          activeIndex={activeIndex}
+          carouselDirection={carouselDirection}
+          isInteractionDisabled={isInteractionDisabled}
+          onChudaoOpen={onChudaoOpen}
+        />
+        <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
+        <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
+        <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
+        <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
         <div className="brand-detail__copy">
           <h1>
             <DetailTitle title={detailCopy.title} />
