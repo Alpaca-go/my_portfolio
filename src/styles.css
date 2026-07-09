@@ -43,6 +43,7 @@ body,
   height: 1280px;
   background: #f1f1f1;
   background-color: #f1f1f1;
+  overflow: hidden;
 }
 
 body {
@@ -614,51 +615,12 @@ body {
   pointer-events: none;
 }
 
-.brand-detail__grid {
-  position: absolute;
-  left: 580px;
-  top: 70px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 1400px;
-  height: 860px;
-}
-
-.brand-detail__grid-row {
-  display: flex;
-  gap: 10px;
-}
-
-.brand-detail__tile-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.brand-detail__tile {
-  flex: none;
-  border-radius: 20px;
-  background: #e3e3e3;
-}
-
-.brand-detail__tile-small {
-  width: 225px;
-  height: 135px;
-  border-radius: 16px;
-}
-
 .feng-grid {
   position: absolute;
   left: 580px;
   top: 70px;
   width: 1400px;
   height: 860px;
-}
-
-.feng-grid--brand-background {
-  z-index: 0;
-  filter: grayscale(1) contrast(1.05);
 }
 
 .feng-grid__tile {
@@ -696,27 +658,37 @@ body {
 
 .brand-detail__fan-card {
   position: absolute;
+  left: 0;
+  top: 0;
+  --card-left: 0px;
+  --card-top: 0px;
+  --card-width: 210px;
+  --card-height: 210px;
+  --card-rotate: 0deg;
+  --card-motion-duration: 780ms;
+  --card-opacity-duration: 520ms;
   padding: 0;
-  border: 4px solid #fff;
+  width: var(--card-width);
+  height: var(--card-height);
+  border: 2px solid #fff;
   border-radius: 32px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
   overflow: hidden;
   appearance: none;
   backface-visibility: hidden;
+  contain: layout paint style;
   cursor: default;
   isolation: isolate;
+  transform: translate3d(var(--card-left), var(--card-top), 0) rotate(var(--card-rotate));
   transform-origin: 0% 0%;
   transition:
-    left 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    top 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    width 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    height 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    rotate 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 520ms ease,
-    filter 520ms ease,
+    width var(--card-motion-duration) cubic-bezier(0.16, 1, 0.3, 1),
+    height var(--card-motion-duration) cubic-bezier(0.16, 1, 0.3, 1),
+    transform var(--card-motion-duration) cubic-bezier(0.16, 1, 0.3, 1),
+    opacity var(--card-opacity-duration) ease,
     background-color 520ms ease,
     box-shadow 520ms ease;
-  will-change: left, top, width, height, rotate;
+  will-change: transform, width, height, opacity;
 }
 
 .brand-detail__fan-card--clickable {
@@ -728,26 +700,15 @@ body {
   outline-offset: 8px;
 }
 
-.brand-detail__fan-card--motion-target {
-  transition:
-    left 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    top 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    width 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    height 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    rotate 780ms cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0ms,
-    filter 520ms ease,
-    background-color 520ms ease,
-    box-shadow 520ms ease;
-}
-
 .brand-detail__fan-card::after {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: inherit;
-  background: rgba(0, 0, 0, var(--card-overlay-alpha, 0));
+  background: rgba(255, 255, 255, var(--card-overlay-alpha, 0));
   pointer-events: none;
+  transition: background 520ms ease;
 }
 
 .brand-detail__fan-card-image {
@@ -755,12 +716,124 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: grayscale(1) contrast(1.02);
+  transition: filter 520ms ease;
+}
+
+.brand-detail__fan-card--center .brand-detail__fan-card-image {
+  filter: grayscale(0) contrast(1);
+}
+
+.brand-detail__center-frame {
+  position: absolute;
+  left: 1090px;
+  top: 302px;
+  width: 380px;
+  height: 471px;
+  pointer-events: none;
+}
+
+.brand-detail__center-frame-base {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  color: #f7f7f7;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 10px rgba(36, 0, 81, 0.35));
+}
+
+.brand-detail__center-frame-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.brand-detail__center-frame-svg path {
+  fill: currentColor;
+}
+
+.brand-detail__center-frame-caption {
+  position: absolute;
+  left: 10px;
+  top: 383px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 360px;
+  padding-left: 10px;
+  gap: 4px;
+}
+
+.brand-detail__center-frame-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #000;
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", system-ui, sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.brand-detail__center-frame-action {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border-radius: 999px;
+  background: #b8aafa;
+  transform: rotate(180deg);
+}
+
+.brand-detail__center-frame-action svg {
+  display: block;
+  width: 44px;
+  height: 44px;
+}
+
+.brand-detail__center-frame-action path {
+  fill: #fff;
+}
+
+.brand-detail__center-frame-badge {
+  position: absolute;
+  left: 29px;
+  top: 27px;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #cfacf6 0%, #a978e7 100%);
+  color: #000;
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+}
+
+.brand-detail__center-frame-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 11;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  pointer-events: auto;
 }
 
 .brand-detail__fan-card-number {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -778,9 +851,8 @@ body {
 }
 
 .brand-detail__fan-card--edge {
-  --card-overlay-alpha: 0.3;
+  --card-overlay-alpha: 0.45;
   opacity: 0;
-  filter: blur(1.2px);
 }
 
 .brand-detail.is-visible .brand-detail__fan-card--edge {
@@ -796,7 +868,12 @@ body {
   opacity: 0;
 }
 
+.brand-detail.is-card-transitioning .brand-detail__fan-card--center {
+  opacity: 0;
+}
+
 .brand-detail.is-project-transitioning .brand-detail__fan-card--edge,
+.brand-detail.is-project-transitioning .brand-detail__center-frame,
 .brand-detail.is-project-transitioning .brand-detail__copy,
 .brand-detail.is-project-transitioning .brand-detail__down,
 .brand-detail.is-project-transitioning .brand-detail__arrow {
@@ -819,81 +896,106 @@ body {
 .brand-detail__fan-card--hidden {
   --card-overlay-alpha: 0;
   z-index: 0;
-  width: 210px;
-  height: 210px;
+  --card-width: 210px;
+  --card-height: 210px;
   background: #ccc;
   opacity: 0;
-  filter: none;
   pointer-events: none;
 }
 
-.brand-detail__fan-card--edge.brand-detail__fan-card--hidden {
-  filter: none;
+.brand-detail__fan-card--off-left {
+  --card-left: -150px;
+  --card-top: 250px;
+  --card-rotate: -26deg;
 }
 
-.brand-detail__fan-card--off-left {
-  left: -150px;
-  top: 250px;
-  rotate: -26deg;
+.brand-detail__fan.is-moving-next .brand-detail__fan-card--off-left {
+  --card-left: 12px;
+  --card-top: 218px;
+  --card-rotate: -22deg;
+  --card-motion-duration: 360ms;
+  --card-opacity-duration: 220ms;
 }
 
 .brand-detail__fan-card--outer-left {
-  left: 57.328px;
-  top: 207.244px;
+  --card-left: 57.328px;
+  --card-top: 207.244px;
   z-index: 1;
-  width: 210px;
-  height: 210px;
+  --card-width: 210px;
+  --card-height: 210px;
   background: #ccc;
-  rotate: -20deg;
+  --card-rotate: -20deg;
 }
 
 .brand-detail__fan-card--inner-left {
-  --card-overlay-alpha: 0.16;
-  left: 214.859px;
-  top: 92.278px;
+  --card-overlay-alpha: 0.45;
+  --card-left: 214.859px;
+  --card-top: 92.278px;
   z-index: 3;
-  width: 310px;
-  height: 310px;
+  --card-width: 310px;
+  --card-height: 310px;
   background: #ddd;
-  rotate: -10deg;
+  --card-rotate: -10deg;
 }
 
 .brand-detail__fan-card--center {
   --card-overlay-alpha: 0;
-  left: 520px;
-  top: 0;
-  z-index: 5;
-  width: 360px;
-  height: 360px;
+  --card-left: 520px;
+  --card-top: -8px;
+  z-index: 7;
+  --card-width: 360px;
+  --card-height: 360px;
+  border: 2px solid #fff;
+  border-radius: 32px;
   background: #f6f6f6;
-  rotate: 0deg;
+  --card-rotate: 0deg;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+.brand-detail__fan-card[data-card-key="brand-44"] .brand-detail__fan-card-image {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 243.333%;
+  height: 146.111%;
+  max-width: none;
+  transform: translate(-67.237%, -34.221%);
 }
 
 .brand-detail__fan-card--inner-right {
-  --card-overlay-alpha: 0.16;
-  left: 879.859px;
-  top: 38.448px;
+  --card-overlay-alpha: 0.45;
+  --card-left: 879.859px;
+  --card-top: 38.448px;
   z-index: 4;
-  width: 310px;
-  height: 310px;
+  --card-width: 310px;
+  --card-height: 310px;
   background: #ddd;
-  rotate: 10deg;
+  --card-rotate: 10deg;
 }
 
 .brand-detail__fan-card--outer-right {
-  left: 1145.328px;
-  top: 135.42px;
+  --card-left: 1145.328px;
+  --card-top: 135.42px;
   z-index: 2;
-  width: 210px;
-  height: 210px;
+  --card-width: 210px;
+  --card-height: 210px;
   background: #ccc;
-  rotate: 20deg;
+  --card-rotate: 20deg;
 }
 
 .brand-detail__fan-card--off-right {
-  left: 1450px;
-  top: 82px;
-  rotate: 26deg;
+  --card-left: 1450px;
+  --card-top: 82px;
+  --card-rotate: 26deg;
+}
+
+.brand-detail__fan.is-moving-previous .brand-detail__fan-card--off-right {
+  --card-left: 1190px;
+  --card-top: 126px;
+  --card-rotate: 22deg;
+  --card-motion-duration: 360ms;
+  --card-opacity-duration: 220ms;
 }
 
 .brand-detail__arrow {
@@ -1121,8 +1223,9 @@ body {
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 1;
   border-radius: inherit;
-  background: rgba(0, 0, 0, var(--from-overlay, 0));
+  background: rgba(255, 255, 255, var(--from-overlay, 0));
   opacity: 1;
   pointer-events: none;
   transition: background 520ms calc(var(--transition-delay) + 260ms) ease;
@@ -1133,6 +1236,8 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  filter: var(--from-image-filter, grayscale(0) contrast(1));
+  transition: filter 520ms calc(var(--transition-delay) + 260ms) ease;
 }
 
 .card-transition-layer.is-active .card-transition-layer__card {
@@ -1140,7 +1245,7 @@ body {
   top: var(--target-top) !important;
   width: var(--target-width) !important;
   height: var(--target-height) !important;
-  border-width: var(--target-border-width, 4px);
+  border-width: var(--target-border-width, 2px);
   border-radius: var(--target-radius, 32px);
   background: var(--target-background);
   box-shadow: var(--target-shadow, 0 2px 10px rgba(0, 0, 0, 0.35));
@@ -1149,7 +1254,11 @@ body {
 }
 
 .card-transition-layer.is-active .card-transition-layer__card::after {
-  background: rgba(0, 0, 0, var(--target-overlay, 0));
+  background: rgba(255, 255, 255, var(--target-overlay, 0));
+}
+
+.card-transition-layer.is-active .card-transition-layer__card-image {
+  filter: var(--target-image-filter, grayscale(0) contrast(1));
 }
 
 .feng-detail {

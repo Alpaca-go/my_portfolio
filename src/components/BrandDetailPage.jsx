@@ -1,14 +1,69 @@
 import React from "react";
-import FengTangGrid from "./FengTangGrid";
 
 const carouselCards = [
-  { key: "brand-16", number: "01", image: "/assets/brand-carousel-16.png", alt: "Chudao Xiang cuisine brand design" },
-  { key: "brand-32", number: "02", image: "/assets/brand-carousel-32.png", alt: "Yi Ji Liang Fang brand design" },
-  { key: "brand-44", number: "03", image: "/assets/brand-carousel-44.png", alt: "Jointown Aesthetics brand design" },
-  { key: "brand-58", number: "04", image: "/assets/brand-carousel-58.png", alt: "Ming Ji Tang brand design" },
-  { key: "brand-83", number: "05", image: "/assets/brand-carousel-83.png", alt: "WOW YEAH brand design" },
-  { key: "brand-05", number: "06", image: "/assets/brand-carousel-05.png", alt: "668 spicy shrimp brand design" },
-  { key: "brand-71", number: "07", image: "/assets/brand-carousel-71.png", alt: "Feng Tang Tang brand design" }
+  {
+    key: "brand-16",
+    number: "01",
+    image: "/assets/brand-carousel-16.png",
+    alt: "Chudao Xiang cuisine brand design",
+    title: "厨道·湘菜",
+    subtitle: "品牌设计",
+    badge: "餐饮"
+  },
+  {
+    key: "brand-32",
+    number: "02",
+    image: "/assets/brand-carousel-32.png",
+    alt: "Yi Ji Liang Fang brand design",
+    title: "一剂良方",
+    subtitle: "品牌设计",
+    badge: "中医养生"
+  },
+  {
+    key: "brand-44",
+    number: "03",
+    image: "/assets/brand-carousel-44-detail.png",
+    alt: "Jointown Aesthetics brand design",
+    title: "九州通·九州美学",
+    subtitle: "品牌设计",
+    badge: "轻医美"
+  },
+  {
+    key: "brand-58",
+    number: "04",
+    image: "/assets/brand-carousel-58.png",
+    alt: "Ming Ji Tang brand design",
+    title: "名济堂",
+    subtitle: "品牌设计",
+    badge: "中药养生"
+  },
+  {
+    key: "brand-83",
+    number: "05",
+    image: "/assets/brand-carousel-83.png",
+    alt: "WOW YEAH brand design",
+    title: "WOW YEAH",
+    subtitle: "品牌设计",
+    badge: "餐饮"
+  },
+  {
+    key: "brand-05",
+    number: "06",
+    image: "/assets/brand-carousel-05.png",
+    alt: "668 spicy shrimp brand design",
+    title: "668麻辣虾",
+    subtitle: "品牌设计",
+    badge: "餐饮"
+  },
+  {
+    key: "brand-71",
+    number: "07",
+    image: "/assets/brand-carousel-71.png",
+    alt: "Feng Tang Tang brand design",
+    title: "冯堂堂",
+    subtitle: "品牌设计",
+    badge: "餐饮"
+  }
 ];
 
 const fanSlots = [
@@ -21,63 +76,59 @@ const fanSlots = [
   "off-right"
 ];
 
-const topTiles = [
-  { className: "brand-detail__tile", style: { width: 225, height: 280 } },
-  { className: "brand-detail__tile", style: { width: 225, height: 280 } },
-  { className: "brand-detail__tile", style: { width: 460, height: 280 } },
-  { className: "brand-detail__tile", style: { width: 225, height: 280 } },
-  { className: "brand-detail__tile-stack", children: [135, 135] }
-];
-
-const bottomTiles = [
-  { width: 225 },
-  { width: 303 },
-  { width: 186 },
-  { width: 186 },
-  { width: 225 },
-  { width: 225 }
-];
-
-function BackgroundGrid() {
-  return (
-    <div className="brand-detail__grid" aria-hidden="true">
-      <div className="brand-detail__grid-row">
-        {topTiles.map((tile, index) => (
-          tile.children ? (
-            <div className={tile.className} key={index}>
-              {tile.children.map((height, childIndex) => (
-                <div className="brand-detail__tile brand-detail__tile-small" style={{ height }} key={childIndex} />
-              ))}
-            </div>
-          ) : (
-            <div className={tile.className} style={tile.style} key={index} />
-          )
-        ))}
-      </div>
-      <div className="brand-detail__grid-row">
-        <div className="brand-detail__tile-stack">
-          <div className="brand-detail__tile brand-detail__tile-small" />
-          <div className="brand-detail__tile brand-detail__tile-small" />
-        </div>
-        <div className="brand-detail__tile" style={{ width: 225, height: 280 }} />
-        <div className="brand-detail__tile" style={{ width: 460, height: 280 }} />
-        <div className="brand-detail__tile" style={{ width: 460, height: 280 }} />
-      </div>
-      <div className="brand-detail__grid-row">
-        {bottomTiles.map((tile, index) => (
-          <div className="brand-detail__tile" style={{ width: tile.width, height: 280 }} key={index} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function getWrappedCard(index) {
   return carouselCards[((index % carouselCards.length) + carouselCards.length) % carouselCards.length];
 }
 
 function getSlotForVirtualIndex(virtualIndex, activeIndex) {
   return fanSlots[virtualIndex - activeIndex + 3];
+}
+
+function CenterFanFrame({ card, isClickable, onOpen }) {
+  const handleKeyDown = (event) => {
+    if (!isClickable || (event.key !== "Enter" && event.key !== " ")) {
+      return;
+    }
+
+    event.preventDefault();
+    onOpen?.();
+  };
+
+  return (
+    <div className="brand-detail__center-frame">
+      <div className="brand-detail__center-frame-base" aria-hidden="true">
+        <svg
+          className="brand-detail__center-frame-svg"
+          viewBox="0 0 380 470"
+          focusable="false"
+          aria-hidden="true"
+        >
+          <path d="M342,0H38C17,0,0,17,0,38v394c0,21,17,38,38,38h304c21,0,38-17,38-38V38C380,17,363,0,342,0z M368,336.4c0,17.5-14.2,31.6-31.6,31.6H43.6C26.2,368,12,353.8,12,336.4V43.6C12,26.2,26.2,12,43.6,12h292.7c17.5,0,31.6,14.2,31.6,31.6V336.4z" />
+        </svg>
+      </div>
+      <div className="brand-detail__center-frame-caption">
+        <div className="brand-detail__center-frame-text">
+          <span>{card.title}</span>
+          <span>{card.subtitle}</span>
+        </div>
+        <div className="brand-detail__center-frame-action" aria-hidden="true">
+          <svg viewBox="0 -960 880 880">
+            <path d="M252.087-492.499l134.75 134.75q8.25 8.25 7.793 19.25t-8.709 19.25q-8.25 8.25-19.25 8.25t-19.25-8.25L165.921-500.749q-8.25-8.25-8.25-19.25t8.25-19.25l182.416-182.416q8.25-8.25 19.25-8.25t19.25 8.25q8.25 8.25 8.25 19.707t-8.25 19.709L252.087-547.499h454.668q11.916 0 19.707 7.791T734.255-519.999q0 11.916-7.793 19.709T706.755-492.499H252.087Z" />
+          </svg>
+        </div>
+      </div>
+      {card.badge ? <div className="brand-detail__center-frame-badge">{card.badge}</div> : null}
+      {isClickable ? (
+        <button
+          className="brand-detail__center-frame-hit"
+          type="button"
+          aria-label="Open Chudao Xiang cuisine project detail"
+          onClick={onOpen}
+          onKeyDown={handleKeyDown}
+        />
+      ) : null}
+    </div>
+  );
 }
 
 function FanCard({ virtualIndex, activeIndex, onChudaoOpen, isInteractionDisabled }) {
@@ -211,7 +262,7 @@ function DetailTitle({ title }) {
 }
 
 export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, onBack, onChudaoOpen }) {
-  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [activeIndex, setActiveIndex] = React.useState(2);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
   const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
@@ -243,7 +294,7 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
     }
 
     setCarouselDirection(null);
-    setActiveIndex(0);
+    setActiveIndex(2);
   }, [isCardTransitioning, isVisible, isClosing]);
 
   const slideCarousel = (direction) => {
@@ -267,7 +318,6 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
 
   return (
     <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
-      {isChudaoActive ? <FengTangGrid className="feng-grid--brand-background" hidden /> : <BackgroundGrid />}
       <div className="brand-detail__veil" />
       <section className="brand-detail__content" aria-label={detailCopy.title}>
         <FanCards
@@ -275,6 +325,11 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
           carouselDirection={carouselDirection}
           isInteractionDisabled={isInteractionDisabled}
           onChudaoOpen={onChudaoOpen}
+        />
+        <CenterFanFrame
+          card={centerCard}
+          isClickable={isChudaoActive && !isInteractionDisabled}
+          onOpen={onChudaoOpen}
         />
         <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
         <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />

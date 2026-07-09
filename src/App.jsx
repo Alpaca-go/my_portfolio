@@ -133,6 +133,28 @@ function parseRotate(value) {
   return normalized > 180 ? normalized - 360 : normalized;
 }
 
+function parseTransformRotate(value) {
+  if (!value || value === "none") {
+    return null;
+  }
+
+  const match = value.match(/^matrix(?:3d)?\((.+)\)$/);
+
+  if (!match) {
+    return null;
+  }
+
+  const values = match[1].split(",").map((part) => Number.parseFloat(part.trim()));
+  const a = values[0];
+  const b = values[1];
+
+  if (!Number.isFinite(a) || !Number.isFinite(b)) {
+    return null;
+  }
+
+  return parseRotate(`${Math.atan2(b, a) * 180 / Math.PI}deg`);
+}
+
 function getOriginFromBoundingBox(rect, width, height, rotate) {
   const radians = rotate * Math.PI / 180;
   const cos = Math.cos(radians);
@@ -162,7 +184,7 @@ function readMotionBox(element, canvasRect, fallbackRotate = 0) {
   const height = Number.parseFloat(styles.height) || rect.height;
   const rotate = styles.rotate && styles.rotate !== "none"
     ? parseRotate(styles.rotate)
-    : fallbackRotate;
+    : parseTransformRotate(styles.transform) ?? fallbackRotate;
   const origin = getOriginFromBoundingBox(rect, width, height, rotate);
 
   return {
@@ -238,9 +260,13 @@ function measureFanCards() {
       return [];
     }
 
+    const motionTarget = target.getAttribute("data-fan-slot") === "center"
+      ? target.querySelector(".brand-detail__fan-card-media") ?? target
+      : target;
+
     return [{
-      ...readMotionBox(target, canvasRect),
-      image: readElementImage(target)
+      ...readMotionBox(motionTarget, canvasRect),
+      image: readElementImage(motionTarget)
     }];
   });
 }
@@ -284,7 +310,9 @@ function measureCardTransition(cardLabel) {
     targetBoxes[index] ? [{
       from: sourceBox,
       to: targetBoxes[index],
-      image: sourceBox.image
+      image: targetBoxes[index].image ?? sourceBox.image,
+      targetOverlay: index === 1 ? "0" : "0.45",
+      targetImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)"
     }] : []
   ));
 }
@@ -300,7 +328,9 @@ function measureCenteredCardTransition() {
       fromOpacity: "0.72",
       targetOpacity: "1",
       opacityDuration: "100ms",
-      opacityDelayExtra: "20ms"
+      opacityDelayExtra: "20ms",
+      targetOverlay: index === 1 ? "0" : "0.45",
+      targetImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)"
     }] : []
   ));
 }
@@ -327,7 +357,7 @@ function measureChudaoProjectTransition() {
     image: readElementImage(source),
     fromBackground: "#f6f6f6",
     fromOverlay: "0",
-    fromBorderWidth: "4px",
+    fromBorderWidth: "2px",
     fromRadius: "32px",
     fromShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
     targetBackground: "#ddd",
@@ -370,8 +400,10 @@ function CardTransitionLayer({ cards, isActive }) {
             "--target-height": `${card.to.height}px`,
             "--target-rotate": `${card.to.rotate}deg`,
             "--target-background": card.targetBackground ?? (index === 1 ? "#f6f6f6" : "#ddd"),
-            "--target-overlay": card.targetOverlay ?? (index === 1 ? "0" : "0.16"),
-            "--target-border-width": card.targetBorderWidth ?? "4px",
+            "--target-overlay": card.targetOverlay ?? "0",
+            "--from-image-filter": card.fromImageFilter ?? "grayscale(0) contrast(1)",
+            "--target-image-filter": card.targetImageFilter ?? "grayscale(0) contrast(1)",
+            "--target-border-width": card.targetBorderWidth ?? "2px",
             "--target-radius": card.targetRadius ?? "32px",
             "--target-shadow": card.targetShadow ?? "0 2px 10px rgba(0, 0, 0, 0.35)",
             "--target-opacity": card.targetOpacity ?? "1",
@@ -503,8 +535,10 @@ export default function App() {
         to: returnTarget,
         image: fanCard.image,
         fromBackground: index === 1 ? "#f6f6f6" : "#ddd",
-        fromOverlay: index === 1 ? "0" : "0.16",
-        fromBorderWidth: "4px",
+        fromOverlay: index === 1 ? "0" : "0.45",
+        fromImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)",
+        targetImageFilter: "grayscale(0) contrast(1)",
+        fromBorderWidth: "2px",
         fromRadius: "32px",
         fromShadow: "0 2px 10px rgba(0, 0, 0, 0.35)",
         targetBackground: "#fff",
