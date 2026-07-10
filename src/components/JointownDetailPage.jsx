@@ -112,7 +112,7 @@ function DetailGallery() {
   );
 }
 
-export default function JointownDetailPage({ onBack }) {
+export default function JointownDetailPage({ onBack, isClosing = false, isEntering = false }) {
   const [isReady, setIsReady] = React.useState(false);
 
   React.useEffect(() => {
@@ -121,8 +121,10 @@ export default function JointownDetailPage({ onBack }) {
   }, []);
 
   return (
-    <main className={`jointown-detail ${isReady ? "is-ready" : ""}`} aria-label="Jointown Aesthetics brand detail">
-      <div className="jointown-detail__hero" aria-hidden="true" />
+    <main className={`jointown-detail ${isReady ? "is-ready" : ""} ${isEntering ? "is-entering" : ""} ${isClosing ? "is-closing" : ""}`} aria-label="Jointown Aesthetics brand detail">
+      <div className="jointown-detail__hero" aria-hidden="true">
+        <img src="/assets/brand-carousel-44-light.png" alt="" decoding="sync" fetchPriority="high" />
+      </div>
       <div className="jointown-detail__inner">
         <DetailHeader onBack={onBack} />
         <section className="jointown-detail__body" aria-label="Project overview">

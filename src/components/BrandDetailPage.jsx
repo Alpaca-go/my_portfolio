@@ -196,26 +196,6 @@ function FanCards({ activeIndex, carouselDirection, onChudaoOpen, onJointownOpen
   );
 }
 
-function ArrowButton({ direction, onClick, disabled = false }) {
-  const path = direction === "left"
-    ? "m368-480 315 315q11 11 11 27.5T683-109q-12 12-28.5 12T626-109L297-438q-9-9-13-20t-4-22q0-11 4-22t13-20l330-330q12-12 28-11.5t28 12.5q11 12 11.5 28T683-795L368-480Z"
-    : "M591-482 276-797q-11-11-11-27.5t11-28.5q12-12 28.5-12t28.5 12l329 329q9 9 13 20t4 22q0 11-4 22t-13 20L332-110q-12 12-28 11.5T276-111q-11-12-11.5-28t11.5-28l315-315Z";
-
-  return (
-    <button
-      className={`brand-detail__arrow brand-detail__arrow--${direction}`}
-      aria-label={direction === "left" ? "Previous card" : "Next card"}
-      onClick={onClick}
-      disabled={disabled}
-      type="button"
-    >
-      <svg viewBox="0 -960 960 960" aria-hidden="true">
-        <path d={path} fill="#fff" />
-      </svg>
-    </button>
-  );
-}
-
 function CarouselHitZone({ direction, onClick, disabled = false }) {
   return (
     <button
@@ -259,7 +239,7 @@ function DetailTitle({ title }) {
   );
 }
 
-export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, onBack, onChudaoOpen, onJointownOpen }) {
+export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, hasProjectDetail = false, isProjectOpening = false, isProjectClosing = false, onBack, onChudaoOpen, onJointownOpen }) {
   const [activeIndex, setActiveIndex] = React.useState(2);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
@@ -276,7 +256,10 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
     isVisible ? "is-visible" : "",
     isClosing ? "is-closing" : "",
     isCardTransitioning ? "is-card-transitioning" : "",
-    isProjectTransitioning ? "is-project-transitioning" : ""
+    isProjectTransitioning ? "is-project-transitioning" : "",
+    hasProjectDetail ? "has-project-detail" : "",
+    isProjectOpening ? "is-project-opening" : "",
+    isProjectClosing ? "is-project-closing" : ""
   ].filter(Boolean).join(" ");
 
   React.useEffect(() => () => {
@@ -337,8 +320,6 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
         />
         <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
         <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
-        <ArrowButton direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
-        <ArrowButton direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
         <div className="brand-detail__copy">
           <h1>
             <DetailTitle title={detailCopy.title} />

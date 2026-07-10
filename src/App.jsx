@@ -417,6 +417,7 @@ function measureJointownProjectTransition() {
     image: readElementImage(source),
     cardKey: "brand-44",
     transitionKind: "jointown-hero",
+    motionDuration: "760ms",
     fromImage: {
       left: sourceImageRect.left - sourceRect.left - sourceBorder,
       top: sourceImageRect.top - sourceRect.top - sourceBorder,
@@ -442,33 +443,135 @@ function measureJointownProjectTransition() {
   }];
 }
 
-function CardTransitionLayer({ cards, isActive }) {
+function measureJointownReturnTransition() {
+  const canvas = document.querySelector(".page-canvas");
+  const hero = document.querySelector(".jointown-detail__hero");
+  const target = document.querySelector("[data-card-key='brand-44'][data-fan-slot='center']");
+  const targetImage = target?.querySelector("img");
+
+  if (!canvas || !hero || !target || !targetImage) {
+    return [];
+  }
+
+  const canvasRect = canvas.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const targetImageRect = targetImage.getBoundingClientRect();
+  const targetBorder = Number.parseFloat(window.getComputedStyle(target).borderLeftWidth) || 0;
+
+  return [{
+    from: readMotionBox(hero, canvasRect),
+    to: readMotionBox(target, canvasRect),
+    image: {
+      src: "/assets/jointown-detail/hero.png",
+      alt: "Jointown Aesthetics brand design"
+    },
+    cardKey: "brand-44",
+    transitionKind: "jointown-return",
+    motionDuration: "760ms",
+    fromImage: {
+      left: 0,
+      top: 0,
+      width: hero.getBoundingClientRect().width,
+      height: hero.getBoundingClientRect().height
+    },
+    targetImage: {
+      left: targetImageRect.left - targetRect.left - targetBorder,
+      top: targetImageRect.top - targetRect.top - targetBorder,
+      width: targetImageRect.width,
+      height: targetImageRect.height
+    },
+    fromBackground: "#fbf9ff",
+    fromOverlay: "0",
+    fromBorderWidth: "0px",
+    fromRadius: "0px",
+    fromShadow: "none",
+    targetBackground: "#fbf9ff",
+    targetOverlay: "0",
+    targetBorderWidth: "2px",
+    targetRadius: "32px",
+    targetShadow: "none"
+  }];
+}
+
+function CardTransitionLayer({ cards, isActive, onMotionEnd }) {
   if (!cards.length) {
     return null;
   }
 
-  const classes = ["card-transition-layer", isActive ? "is-active" : ""].filter(Boolean).join(" ");
+  const isProjectTransition = cards.some((card) => Boolean(card.transitionKind));
+  const classes = [
+    "card-transition-layer",
+    isProjectTransition ? "card-transition-layer--project" : "",
+    isActive ? "is-active" : ""
+  ].filter(Boolean).join(" ");
 
   return (
     <div className={classes} aria-hidden="true">
-      {cards.map((card, index) => (
-        <div
+      {cards.map((card, index) => {
+        const usesTransformMotion = Boolean(
+          card.transitionKind?.startsWith("jointown-")
+          && card.from.width > 0
+          && card.from.height > 0
+          && card.to.width > 0
+          && card.to.height > 0
+        );
+        const scaleX = usesTransformMotion ? card.from.width / card.to.width : 1;
+        const scaleY = usesTransformMotion ? card.from.height / card.to.height : 1;
+        const translateX = usesTransformMotion ? card.from.left - card.to.left : 0;
+        const translateY = usesTransformMotion ? card.from.top - card.to.top : 0;
+        const hasImageMotion = Boolean(usesTransformMotion && card.fromImage && card.targetImage);
+        const initialImageLeft = hasImageMotion ? card.fromImage.left / scaleX : 0;
+        const initialImageTop = hasImageMotion ? card.fromImage.top / scaleY : 0;
+        const initialImageWidth = hasImageMotion ? card.fromImage.width / scaleX : 0;
+        const initialImageHeight = hasImageMotion ? card.fromImage.height / scaleY : 0;
+        const cropAlignmentOffsetX = card.transitionKind === "jointown-hero"
+          ? 8 / scaleX
+          : card.transitionKind === "jointown-return"
+            ? -8 / scaleX
+            : 0;
+        const imageTranslateX = hasImageMotion
+          ? initialImageLeft - card.targetImage.left + cropAlignmentOffsetX
+          : 0;
+        const imageTranslateY = hasImageMotion ? initialImageTop - card.targetImage.top : 0;
+        const imageScaleX = hasImageMotion ? initialImageWidth / card.targetImage.width : 1;
+        const imageScaleY = hasImageMotion ? initialImageHeight / card.targetImage.height : 1;
+        const fromRadius = Number.parseFloat(card.fromRadius);
+        const compensatedFromRadius = usesTransformMotion && Number.isFinite(fromRadius)
+          ? `${fromRadius / scaleX}px / ${fromRadius / scaleY}px`
+          : card.fromRadius ?? "18px";
+
+        return <div
           className="card-transition-layer__card"
           key={index}
           data-card-key={card.cardKey || undefined}
           data-transition-kind={card.transitionKind || undefined}
+          data-motion-mode={usesTransformMotion ? "transform" : undefined}
+          onTransitionEnd={(event) => {
+            if (
+              !card.transitionKind
+              || usesTransformMotion
+              || event.target !== event.currentTarget
+              || event.propertyName !== "width"
+            ) {
+              return;
+            }
+
+            onMotionEnd?.(card.transitionKind);
+          }}
           style={{
-            left: `${card.from.left}px`,
-            top: `${card.from.top}px`,
-            width: `${card.from.width}px`,
-            height: `${card.from.height}px`,
-            transform: `rotate(${card.from.rotate}deg)`,
+            left: `${usesTransformMotion ? card.to.left : card.from.left}px`,
+            top: `${usesTransformMotion ? card.to.top : card.from.top}px`,
+            width: `${usesTransformMotion ? card.to.width : card.from.width}px`,
+            height: `${usesTransformMotion ? card.to.height : card.from.height}px`,
+            transform: usesTransformMotion
+              ? `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY})`
+              : `translateZ(0) rotate(${card.from.rotate}deg)`,
             zIndex: index === 1 ? 3 : 1,
             "--from-opacity": card.fromOpacity ?? "1",
             "--from-background": card.fromBackground ?? "#fff",
             "--from-overlay": card.fromOverlay ?? "0",
             "--from-border-width": card.fromBorderWidth ?? "5px",
-            "--from-radius": card.fromRadius ?? "18px",
+            "--from-radius": compensatedFromRadius,
             "--from-shadow": card.fromShadow ?? "0 -2px 7px rgba(0, 0, 0, 0.18)",
             "--target-left": `${card.to.left}px`,
             "--target-top": `${card.to.top}px`,
@@ -487,12 +590,19 @@ function CardTransitionLayer({ cards, isActive }) {
             "--target-image-top": card.targetImage ? `${card.targetImage.top}px` : undefined,
             "--target-image-width": card.targetImage ? `${card.targetImage.width}px` : undefined,
             "--target-image-height": card.targetImage ? `${card.targetImage.height}px` : undefined,
+            "--from-image-transform": hasImageMotion
+              ? `translate3d(${imageTranslateX}px, ${imageTranslateY}px, 0) scale(${imageScaleX}, ${imageScaleY})`
+              : undefined,
+            "--motion-object-position": card.transitionKind === "jointown-return"
+              ? "50% 50%"
+              : "calc(50% - 8px) 50%",
             "--target-border-width": card.targetBorderWidth ?? "2px",
             "--target-radius": card.targetRadius ?? "32px",
             "--target-shadow": card.targetShadow ?? "0 2px 10px rgba(0, 0, 0, 0.35)",
             "--target-opacity": card.targetOpacity ?? "1",
             "--opacity-duration": card.opacityDuration ?? "0ms",
             "--opacity-delay-extra": card.opacityDelayExtra ?? "220ms",
+            "--motion-duration": card.motionDuration ?? "860ms",
             "--transition-delay": `${index * 35}ms`
           }}
         >
@@ -504,10 +614,22 @@ function CardTransitionLayer({ cards, isActive }) {
               loading="eager"
               decoding="sync"
               fetchPriority="high"
+              onTransitionEnd={(event) => {
+                if (
+                  !usesTransformMotion
+                  || !card.transitionKind
+                  || event.target !== event.currentTarget
+                  || event.propertyName !== "transform"
+                ) {
+                  return;
+                }
+
+                onMotionEnd?.(card.transitionKind);
+              }}
             />
           ) : null}
         </div>
-      ))}
+      })}
     </div>
   );
 }
@@ -524,6 +646,7 @@ export default function App() {
   const [hideOpeningSheets, setHideOpeningSheets] = React.useState(false);
   const [projectDetail, setProjectDetail] = React.useState(null);
   const [projectTransitioning, setProjectTransitioning] = React.useState(false);
+  const [jointownClosing, setJointownClosing] = React.useState(false);
   const timersRef = React.useRef([]);
 
   const clearTimers = React.useCallback(() => {
@@ -547,6 +670,24 @@ export default function App() {
       image.decode?.().catch(() => undefined);
     });
   }, []);
+
+  const finishJointownTransition = React.useCallback((transitionKind) => {
+    clearTimers();
+
+    if (transitionKind === "jointown-return") {
+      setProjectDetail(null);
+      setJointownClosing(false);
+    } else if (transitionKind === "jointown-hero") {
+      setProjectDetail("jointown");
+    } else {
+      return;
+    }
+
+    setProjectTransitioning(false);
+    setDetailCardsTransitioning(false);
+    setTransitionCards([]);
+    setTransitionActive(false);
+  }, [clearTimers]);
 
   const handleCardOpen = (key, cardLabel) => {
     if (openingKey || closingKey || detailVisible || detailClosing) {
@@ -706,6 +847,7 @@ export default function App() {
 
     clearTimers();
     window.scrollTo(0, 0);
+    setJointownClosing(false);
     const projectCards = measureJointownProjectTransition();
 
     if (!projectCards.length) {
@@ -726,11 +868,44 @@ export default function App() {
 
     queueTimer(() => {
       setProjectDetail("jointown");
-      setProjectTransitioning(false);
-      setDetailCardsTransitioning(false);
-      setTransitionCards([]);
-      setTransitionActive(false);
-    }, 920);
+    }, 520);
+
+    // Safety fallback for browsers that suppress transitionend. Normal cleanup
+    // is driven by the card's width transition so it cannot race the last frame.
+    queueTimer(() => {
+      finishJointownTransition("jointown-hero");
+    }, 1100);
+  };
+
+  const handleJointownBack = () => {
+    if (projectTransitioning || jointownClosing) {
+      return;
+    }
+
+    clearTimers();
+    window.scrollTo(0, 0);
+    const returnCards = measureJointownReturnTransition();
+
+    if (!returnCards.length) {
+      setProjectDetail(null);
+      return;
+    }
+
+    setJointownClosing(true);
+    setDetailCardsTransitioning(true);
+    setProjectTransitioning(true);
+    setTransitionCards(returnCards);
+    setTransitionActive(false);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setTransitionActive(true);
+      });
+    });
+
+    queueTimer(() => {
+      finishJointownTransition("jointown-return");
+    }, 1100);
   };
 
   return (
@@ -749,16 +924,27 @@ export default function App() {
           isClosing={detailClosing}
           isCardTransitioning={detailCardsTransitioning}
           isProjectTransitioning={projectTransitioning}
+          hasProjectDetail={Boolean(projectDetail)}
+          isProjectOpening={projectTransitioning && !jointownClosing}
+          isProjectClosing={jointownClosing}
           onBack={handleDetailBack}
           onChudaoOpen={handleChudaoOpen}
           onJointownOpen={handleJointownOpen}
         />
-        <CardTransitionLayer cards={transitionCards} isActive={transitionActive} />
+        <CardTransitionLayer
+          cards={transitionCards}
+          isActive={transitionActive}
+          onMotionEnd={finishJointownTransition}
+        />
         {projectDetail === "chudao" ? (
           <ChudaoDetailPage onBack={() => setProjectDetail(null)} />
         ) : null}
         {projectDetail === "jointown" ? (
-          <JointownDetailPage onBack={() => setProjectDetail(null)} />
+          <JointownDetailPage
+            isEntering={projectTransitioning && !jointownClosing}
+            isClosing={jointownClosing}
+            onBack={handleJointownBack}
+          />
         ) : null}
       </div>
     </div>
