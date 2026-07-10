@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 
 const carouselCards = [
   {
@@ -22,7 +23,7 @@ const carouselCards = [
   {
     key: "brand-44",
     number: "03",
-    image: "/assets/brand-carousel-44-detail.png",
+    image: "/assets/brand-carousel-44-light.png",
     alt: "Jointown Aesthetics brand design",
     title: "九州通·九州美学",
     subtitle: "品牌设计",
@@ -85,17 +86,8 @@ function getSlotForVirtualIndex(virtualIndex, activeIndex) {
 }
 
 function CenterFanFrame({ card, isClickable, onOpen }) {
-  const handleKeyDown = (event) => {
-    if (!isClickable || (event.key !== "Enter" && event.key !== " ")) {
-      return;
-    }
-
-    event.preventDefault();
-    onOpen?.();
-  };
-
   return (
-    <div className="brand-detail__center-frame">
+    <div className="brand-detail__center-frame" data-card-key={card.key}>
       <div className="brand-detail__center-frame-base" aria-hidden="true">
         <svg
           className="brand-detail__center-frame-svg"
@@ -111,31 +103,36 @@ function CenterFanFrame({ card, isClickable, onOpen }) {
           <span>{card.title}</span>
           <span>{card.subtitle}</span>
         </div>
-        <div className="brand-detail__center-frame-action" aria-hidden="true">
-          <svg viewBox="0 -960 880 880">
-            <path d="M252.087-492.499l134.75 134.75q8.25 8.25 7.793 19.25t-8.709 19.25q-8.25 8.25-19.25 8.25t-19.25-8.25L165.921-500.749q-8.25-8.25-8.25-19.25t8.25-19.25l182.416-182.416q8.25-8.25 19.25-8.25t19.25 8.25q8.25 8.25 8.25 19.707t-8.25 19.709L252.087-547.499h454.668q11.916 0 19.707 7.791T734.255-519.999q0 11.916-7.793 19.709T706.755-492.499H252.087Z" />
-          </svg>
-        </div>
+        {isClickable ? (
+          <button
+            className="brand-detail__center-frame-action brand-detail__center-frame-action--button"
+            type="button"
+            aria-label={`Open ${card.title} project detail`}
+            onClick={onOpen}
+          >
+            <svg viewBox="0 -960 880 880" aria-hidden="true">
+              <path d="M252.087-492.499l134.75 134.75q8.25 8.25 7.793 19.25t-8.709 19.25q-8.25 8.25-19.25 8.25t-19.25-8.25L165.921-500.749q-8.25-8.25-8.25-19.25t8.25-19.25l182.416-182.416q8.25-8.25 19.25-8.25t19.25 8.25q8.25 8.25 8.25 19.707t-8.25 19.709L252.087-547.499h454.668q11.916 0 19.707 7.791T734.255-519.999q0 11.916-7.793 19.709T706.755-492.499H252.087Z" />
+            </svg>
+          </button>
+        ) : (
+          <div className="brand-detail__center-frame-action" aria-hidden="true">
+            <svg viewBox="0 -960 880 880">
+              <path d="M252.087-492.499l134.75 134.75q8.25 8.25 7.793 19.25t-8.709 19.25q-8.25 8.25-19.25 8.25t-19.25-8.25L165.921-500.749q-8.25-8.25-8.25-19.25t8.25-19.25l182.416-182.416q8.25-8.25 19.25-8.25t19.25 8.25q8.25 8.25 8.25 19.707t-8.25 19.709L252.087-547.499h454.668q11.916 0 19.707 7.791T734.255-519.999q0 11.916-7.793 19.709T706.755-492.499H252.087Z" />
+            </svg>
+          </div>
+        )}
       </div>
       {card.badge ? <div className="brand-detail__center-frame-badge">{card.badge}</div> : null}
-      {isClickable ? (
-        <button
-          className="brand-detail__center-frame-hit"
-          type="button"
-          aria-label="Open Chudao Xiang cuisine project detail"
-          onClick={onOpen}
-          onKeyDown={handleKeyDown}
-        />
-      ) : null}
     </div>
   );
 }
 
-function FanCard({ virtualIndex, activeIndex, onChudaoOpen, isInteractionDisabled }) {
+function FanCard({ virtualIndex, activeIndex, onChudaoOpen, onJointownOpen, isInteractionDisabled }) {
   const card = getWrappedCard(virtualIndex);
   const slot = getSlotForVirtualIndex(virtualIndex, activeIndex);
-  const isChudaoCenter = card.key === "brand-16" && slot === "center";
-  const isClickable = isChudaoCenter && !isInteractionDisabled;
+  const projectOpen = card.key === "brand-16" ? onChudaoOpen : card.key === "brand-44" ? onJointownOpen : null;
+  const isProjectCenter = Boolean(projectOpen) && slot === "center";
+  const isClickable = isProjectCenter && !isInteractionDisabled;
   const className = [
     "brand-detail__fan-card",
     slot.includes("outer") ? "brand-detail__fan-card--edge" : "brand-detail__fan-card--motion-target",
@@ -149,7 +146,7 @@ function FanCard({ virtualIndex, activeIndex, onChudaoOpen, isInteractionDisable
     }
 
     event.preventDefault();
-    onChudaoOpen?.();
+    projectOpen?.();
   };
 
   return (
@@ -158,10 +155,10 @@ function FanCard({ virtualIndex, activeIndex, onChudaoOpen, isInteractionDisable
       data-fan-slot={slot}
       data-card-key={card.key}
       data-card-number={card.number}
-      role={isChudaoCenter ? "button" : undefined}
+      role={isProjectCenter ? "button" : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      aria-label={isChudaoCenter ? "Open Chudao Xiang cuisine project detail" : undefined}
-      onClick={isClickable ? onChudaoOpen : undefined}
+      aria-label={isProjectCenter ? `Open ${card.alt} project detail` : undefined}
+      onClick={isClickable ? projectOpen : undefined}
       onKeyDown={handleKeyDown}
     >
       <img
@@ -176,7 +173,7 @@ function FanCard({ virtualIndex, activeIndex, onChudaoOpen, isInteractionDisable
   );
 }
 
-function FanCards({ activeIndex, carouselDirection, onChudaoOpen, isInteractionDisabled }) {
+function FanCards({ activeIndex, carouselDirection, onChudaoOpen, onJointownOpen, isInteractionDisabled }) {
   const classes = [
     "brand-detail__fan",
     carouselDirection ? `is-moving-${carouselDirection}` : ""
@@ -191,6 +188,7 @@ function FanCards({ activeIndex, carouselDirection, onChudaoOpen, isInteractionD
           activeIndex={activeIndex}
           isInteractionDisabled={isInteractionDisabled}
           onChudaoOpen={onChudaoOpen}
+          onJointownOpen={onJointownOpen}
           key={virtualIndex}
         />
       ))}
@@ -261,14 +259,18 @@ function DetailTitle({ title }) {
   );
 }
 
-export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, onBack, onChudaoOpen }) {
+export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, onBack, onChudaoOpen, onJointownOpen }) {
   const [activeIndex, setActiveIndex] = React.useState(2);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
   const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
   const centerCard = getWrappedCard(activeIndex);
   const isChudaoActive = centerCard.key === "brand-16";
+  const isJointownActive = centerCard.key === "brand-44";
+  const centerProjectOpen = isChudaoActive ? onChudaoOpen : isJointownActive ? onJointownOpen : null;
   const isInteractionDisabled = Boolean(carouselDirection || isCardTransitioning || isClosing);
+  const pageCanvas = typeof document === "undefined" ? null : document.querySelector(".page-canvas");
+  const showOpeningFrame = Boolean(pageCanvas && isCardTransitioning && !isClosing && !isProjectTransitioning);
   const classes = [
     "brand-detail",
     isVisible ? "is-visible" : "",
@@ -317,19 +319,21 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
   };
 
   return (
-    <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
-      <div className="brand-detail__veil" />
-      <section className="brand-detail__content" aria-label={detailCopy.title}>
+    <>
+      <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
+        <div className="brand-detail__veil" />
+        <section className="brand-detail__content" aria-label={detailCopy.title}>
         <FanCards
           activeIndex={activeIndex}
           carouselDirection={carouselDirection}
           isInteractionDisabled={isInteractionDisabled}
           onChudaoOpen={onChudaoOpen}
+          onJointownOpen={onJointownOpen}
         />
         <CenterFanFrame
           card={centerCard}
-          isClickable={isChudaoActive && !isInteractionDisabled}
-          onOpen={onChudaoOpen}
+          isClickable={Boolean(centerProjectOpen) && !isInteractionDisabled}
+          onOpen={centerProjectOpen}
         />
         <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
         <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
@@ -347,7 +351,17 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
             <path d="M450-274v-496q0-13 8.5-21.5T480-800q13 0 21.5 8.5T510-770v496l227-227q9-9 21-9t21 9q9 9 9 21t-9 21L501-181q-5 5-10 7t-11 2q-6 0-11-2t-10-7L181-459q-9-9-9-21t9-21q9-9 21-9t21 9l227 227Z" fill="#fff" />
           </svg>
         </button>
-      </section>
-    </main>
+        </section>
+      </main>
+      {showOpeningFrame ? createPortal(
+        <div
+          className={`brand-detail__center-frame-portal ${isVisible ? "is-visible" : ""}`}
+          aria-hidden="true"
+        >
+          <CenterFanFrame card={centerCard} isClickable={false} />
+        </div>,
+        pageCanvas
+      ) : null}
+    </>
   );
 }

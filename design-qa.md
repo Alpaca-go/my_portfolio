@@ -1,29 +1,43 @@
-# Design QA
+# Design QA — 九州通详情页
 
-- source visual truth path: `C:/Users/Administrator/AppData/Local/Temp/codex-clipboard-b887f0fd-cf7b-4f33-8d73-3b05e35e4e0d.png`
-- implementation screenshot path: `F:/my_portfolio/brand-center-card-pass3.png`
-- viewport: browser CSS viewport `2560x1280`; captured PNG is `3200x1600` because the in-app browser reports `devicePixelRatio=0.8`
-- state: home page opened, Brand Design folder clicked, expanded carousel showing `brand-44` as the center card
-- full-view comparison evidence: `F:/my_portfolio/brand-center-card-pass3.png`
-- focused region comparison evidence: `F:/my_portfolio/brand-center-card-comparison-pass3.png`
+- source visual truth path: `F:/my_portfolio/qa-artifacts/jointown-source.png`
+- implementation screenshot path: `F:/my_portfolio/qa-artifacts/jointown-final.png`
+- viewport: fixed application canvas `2560x1280`; in-app browser capture normalized from its reported `devicePixelRatio=0.297`
+- state: Brand Design folder expanded, `brand-44` selected, center card clicked, Jointown Aesthetics detail page visible
+- full-view comparison evidence: `F:/my_portfolio/qa-artifacts/jointown-comparison-final.png`
+- focused region comparison evidence: `F:/my_portfolio/qa-artifacts/jointown-top-comparison-final.png`
 
 **Findings**
 
-- No actionable P0/P1/P2 mismatches remain for the requested center carousel card.
-- Residual P3: the full opened carousel still includes the product page context around the center card (side cards, arrows, background grid, section title). The supplied PNG is an isolated card inspection frame, so final acceptance was judged on the center-card crop.
+- No actionable P0/P1/P2 visual mismatches remain.
+- No gallery placeholders remain; all 12 Paper-provided image assets are present and use the supplied crops.
+- Residual P3: raster antialiasing differs slightly between the supplied PNG export and the in-app browser capture, but component geometry, type hierarchy, imagery, colors, radii, and spacing align.
 
 **Required Fidelity Surfaces**
 
-- Fonts and typography: center-card title/subtitle use `HarmonyOS Sans`, `24px`, `line-height: 1`, `letter-spacing: -0.05em`; pass 2 increased weight to `500` to better match the PNG stroke density.
-- Spacing and layout rhythm: outer card renders at `380x471`, positioned at `x=1090`, `y=302`; media layer renders at `360x360`, positioned at `x=1100`, `y=312`, matching the Paper geometry.
-- Colors and visual tokens: background `#f7f7f7`, media background `#f6f6f6`, white media border, lavender action circle, purple badge gradient, and lavender shadow match the supplied visual direction.
-- Image quality and asset fidelity: the center artwork uses the Paper-provided PNG saved as `public/assets/brand-carousel-44-detail.png`; no placeholder imagery is used.
-- Copy and content: center card copy matches the PNG: `轻医美`, `九州通·九州美学`, `品牌设计`.
+- Fonts and typography: local `Zona Pro` is used for the designer mark; local `HarmonyOS Sans` is used for Chinese navigation, the `78px/700` project title, `24px` pill, and `24px/300/1.6` description. Line wrapping and two-line title structure match the source.
+- Spacing and layout rhythm: fixed `2560x1280` page; `1800px` visual field centered with `380px` side insets; `1720px` content width; three `568px` gallery columns with `8px` gaps; `12px` tile radii; header, summary, navigation, and gallery align to the Paper geometry.
+- Colors and visual tokens: page fill `#FBF9FF`, pill/border `#896EEB`, black typography, 75% black description, translucent close control, and transparent outlined navigation buttons match the source.
+- Image quality and asset fidelity: hero uses the user-provided `01.png`; all gallery images use Paper-provided original PNGs with their exported aspect ratios and `object-fit: cover`. No generated or placeholder imagery is used.
+- Copy and content: Chinese title, category names, pill, and two-line description match the visual source.
 
-**Patches Made Since Previous QA Pass**
+**Interaction Verification**
 
-- Pass 1: added a dedicated center-card component structure with outer card frame, media crop, badge, bottom text, and circular arrow.
-- Pass 2: tuned bottom text weight and action-button lavender color after the first browser screenshot comparison.
-- Pass 3: added metadata for all carousel cards so the new center-card bottom layer stays correct when users navigate the carousel.
+- The center `brand-44` card exposes a button role, keyboard focus, and click route to the detail page.
+- The separate bottom-right card arrow routes to the same detail page and has a `#5837BD` hover/focus state.
+- The selected card artwork morphs from `360x360 @ (1100,312)` to the detail hero target `1800x1280 @ (380,0)`, including border-radius and crop handoff.
+- Upper-page elements use ordered fade-up delays from `100ms` through `640ms`; the 12 gallery tiles use a fixed shuffled delay set from `760ms` through `1340ms`.
+- The detail close control and lower-left project navigation button return to the carousel.
+- Browser console errors and warnings: none.
+
+**Comparison History**
+
+- Pass 1 (`jointown-comparison-pass1.png`): found a P2 hero focal-point drift; the woman/peacock composition sat approximately 6–8px too far right. Fixed the hero background position from centered to `calc(50% - 8px) 50%`.
+- Pass 2 (`jointown-comparison-pass2.png`): visual P0/P1/P2 issues were cleared, but interaction testing found a P1 missing callback on the center card body. Passed `onJointownOpen` through the fan-card component and raised the center frame to `z-index: 11` so its arrow owns the hover/click hit area above carousel hit zones.
+- Final (`jointown-comparison-final.png`): source and implementation align across the full view and focused top region; center-card entry, arrow entry, close, and return navigation all work.
+
+**Follow-up Polish**
+
+- P3 only: native browser font/raster antialiasing may vary slightly by display scaling.
 
 final result: passed

@@ -2,11 +2,12 @@ import React from "react";
 import BrandDetailPage from "./components/BrandDetailPage";
 import CollectionShowcase from "./components/CollectionShowcase";
 import ChudaoDetailPage from "./components/FengTangDetailPage";
+import JointownDetailPage from "./components/JointownDetailPage";
 
 const brandCarouselImages = [
   "/assets/brand-carousel-16.png",
   "/assets/brand-carousel-32.png",
-  "/assets/brand-carousel-44.png",
+  "/assets/brand-carousel-44-light.png",
   "/assets/brand-carousel-58.png",
   "/assets/brand-carousel-83.png",
   "/assets/brand-carousel-05.png",
@@ -24,6 +25,22 @@ const chudaoDetailImages = [
   "/assets/feng-tang-detail/package-boxes.png",
   "/assets/feng-tang-detail/package-labels.png",
   "/assets/feng-tang-detail/storefront.png"
+];
+
+const jointownDetailImages = [
+  "/assets/jointown-detail/hero.png",
+  "/assets/jointown-detail/gift-set.png",
+  "/assets/jointown-detail/business-cards.png",
+  "/assets/jointown-detail/handbag.png",
+  "/assets/jointown-detail/wayfinding.png",
+  "/assets/jointown-detail/brand-overview.png",
+  "/assets/jointown-detail/logo-silk.png",
+  "/assets/jointown-detail/color-palette.png",
+  "/assets/jointown-detail/logo-combination.png",
+  "/assets/jointown-detail/symbol-grid.png",
+  "/assets/jointown-detail/typography.png",
+  "/assets/jointown-detail/peacock-violet.png",
+  "/assets/jointown-detail/storefront.png"
 ];
 
 const badgeData = [
@@ -266,7 +283,9 @@ function measureFanCards() {
 
     return [{
       ...readMotionBox(motionTarget, canvasRect),
-      image: readElementImage(motionTarget)
+      image: readElementImage(motionTarget),
+      cardKey: target.getAttribute("data-card-key") ?? "",
+      background: window.getComputedStyle(target).backgroundColor
     }];
   });
 }
@@ -311,6 +330,8 @@ function measureCardTransition(cardLabel) {
       from: sourceBox,
       to: targetBoxes[index],
       image: targetBoxes[index].image ?? sourceBox.image,
+      cardKey: targetBoxes[index].cardKey,
+      targetBackground: targetBoxes[index].background,
       targetOverlay: index === 1 ? "0" : "0.45",
       targetImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)"
     }] : []
@@ -329,6 +350,7 @@ function measureCenteredCardTransition() {
       targetOpacity: "1",
       opacityDuration: "100ms",
       opacityDelayExtra: "20ms",
+      targetBackground: targetBoxes[index].background,
       targetOverlay: index === 1 ? "0" : "0.45",
       targetImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)"
     }] : []
@@ -355,7 +377,8 @@ function measureChudaoProjectTransition() {
       rotate: 0
     },
     image: readElementImage(source),
-    fromBackground: "#f6f6f6",
+    cardKey: source.getAttribute("data-card-key") ?? "",
+    fromBackground: window.getComputedStyle(source).backgroundColor,
     fromOverlay: "0",
     fromBorderWidth: "2px",
     fromRadius: "32px",
@@ -364,6 +387,57 @@ function measureChudaoProjectTransition() {
     targetOverlay: "0",
     targetBorderWidth: "0px",
     targetRadius: "20px",
+    targetShadow: "none"
+  }];
+}
+
+function measureJointownProjectTransition() {
+  const canvas = document.querySelector(".page-canvas");
+  const source = document.querySelector("[data-card-key='brand-44'][data-fan-slot='center']");
+  const sourceImage = source?.querySelector("img");
+
+  if (!canvas || !source || !sourceImage) {
+    return [];
+  }
+
+  const canvasRect = canvas.getBoundingClientRect();
+  const sourceRect = source.getBoundingClientRect();
+  const sourceImageRect = sourceImage.getBoundingClientRect();
+  const sourceBorder = Number.parseFloat(window.getComputedStyle(source).borderLeftWidth) || 0;
+
+  return [{
+    from: readMotionBox(source, canvasRect),
+    to: {
+      left: 380,
+      top: 0,
+      width: 1800,
+      height: 1280,
+      rotate: 0
+    },
+    image: readElementImage(source),
+    cardKey: "brand-44",
+    transitionKind: "jointown-hero",
+    fromImage: {
+      left: sourceImageRect.left - sourceRect.left - sourceBorder,
+      top: sourceImageRect.top - sourceRect.top - sourceBorder,
+      width: sourceImageRect.width,
+      height: sourceImageRect.height
+    },
+    targetImage: {
+      left: 0,
+      top: 0,
+      width: 1800,
+      height: 1280
+    },
+    fromBackground: "#fbf9ff",
+    fromOverlay: "0",
+    fromBorderWidth: "2px",
+    fromRadius: "32px",
+    fromShadow: "none",
+    targetBackground: "#fbf9ff",
+    targetOverlay: "0",
+    targetBorderWidth: "0px",
+    targetRadius: "0px",
     targetShadow: "none"
   }];
 }
@@ -381,6 +455,8 @@ function CardTransitionLayer({ cards, isActive }) {
         <div
           className="card-transition-layer__card"
           key={index}
+          data-card-key={card.cardKey || undefined}
+          data-transition-kind={card.transitionKind || undefined}
           style={{
             left: `${card.from.left}px`,
             top: `${card.from.top}px`,
@@ -403,6 +479,14 @@ function CardTransitionLayer({ cards, isActive }) {
             "--target-overlay": card.targetOverlay ?? "0",
             "--from-image-filter": card.fromImageFilter ?? "grayscale(0) contrast(1)",
             "--target-image-filter": card.targetImageFilter ?? "grayscale(0) contrast(1)",
+            "--from-image-left": card.fromImage ? `${card.fromImage.left}px` : undefined,
+            "--from-image-top": card.fromImage ? `${card.fromImage.top}px` : undefined,
+            "--from-image-width": card.fromImage ? `${card.fromImage.width}px` : undefined,
+            "--from-image-height": card.fromImage ? `${card.fromImage.height}px` : undefined,
+            "--target-image-left": card.targetImage ? `${card.targetImage.left}px` : undefined,
+            "--target-image-top": card.targetImage ? `${card.targetImage.top}px` : undefined,
+            "--target-image-width": card.targetImage ? `${card.targetImage.width}px` : undefined,
+            "--target-image-height": card.targetImage ? `${card.targetImage.height}px` : undefined,
             "--target-border-width": card.targetBorderWidth ?? "2px",
             "--target-radius": card.targetRadius ?? "32px",
             "--target-shadow": card.targetShadow ?? "0 2px 10px rgba(0, 0, 0, 0.35)",
@@ -456,7 +540,7 @@ export default function App() {
   React.useEffect(() => () => clearTimers(), [clearTimers]);
 
   React.useEffect(() => {
-    [...brandCarouselImages, ...chudaoDetailImages].forEach((src) => {
+    [...brandCarouselImages, ...chudaoDetailImages, ...jointownDetailImages].forEach((src) => {
       const image = new Image();
       image.decoding = "sync";
       image.src = src;
@@ -534,7 +618,7 @@ export default function App() {
         from: fanCard,
         to: returnTarget,
         image: fanCard.image,
-        fromBackground: index === 1 ? "#f6f6f6" : "#ddd",
+        fromBackground: fanCard.background ?? (index === 1 ? "#f6f6f6" : "#ddd"),
         fromOverlay: index === 1 ? "0" : "0.45",
         fromImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)",
         targetImageFilter: "grayscale(0) contrast(1)",
@@ -615,6 +699,40 @@ export default function App() {
     }, 920);
   };
 
+  const handleJointownOpen = () => {
+    if (projectDetail || projectTransitioning || detailCardsTransitioning || detailClosing) {
+      return;
+    }
+
+    clearTimers();
+    window.scrollTo(0, 0);
+    const projectCards = measureJointownProjectTransition();
+
+    if (!projectCards.length) {
+      setProjectDetail("jointown");
+      return;
+    }
+
+    setDetailCardsTransitioning(true);
+    setProjectTransitioning(true);
+    setTransitionCards(projectCards);
+    setTransitionActive(false);
+
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        setTransitionActive(true);
+      });
+    });
+
+    queueTimer(() => {
+      setProjectDetail("jointown");
+      setProjectTransitioning(false);
+      setDetailCardsTransitioning(false);
+      setTransitionCards([]);
+      setTransitionActive(false);
+    }, 920);
+  };
+
   return (
     <div className="page-shell">
       <div className="page-canvas">
@@ -633,10 +751,14 @@ export default function App() {
           isProjectTransitioning={projectTransitioning}
           onBack={handleDetailBack}
           onChudaoOpen={handleChudaoOpen}
+          onJointownOpen={handleJointownOpen}
         />
         <CardTransitionLayer cards={transitionCards} isActive={transitionActive} />
         {projectDetail === "chudao" ? (
           <ChudaoDetailPage onBack={() => setProjectDetail(null)} />
+        ) : null}
+        {projectDetail === "jointown" ? (
+          <JointownDetailPage onBack={() => setProjectDetail(null)} />
         ) : null}
       </div>
     </div>
