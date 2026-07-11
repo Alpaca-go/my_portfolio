@@ -1,0 +1,121 @@
+{
+  "1366x768": {
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    },
+    "title": "KYRIES / 王琦 — Brand & Visual Designer",
+    "folderBox": {
+      "x": 575.5725708007812,
+      "y": 447.57818603515625,
+      "width": 213.43756103515625,
+      "height": 153.67498779296875
+    },
+    "scrollWidth": 1366,
+    "hasIdentity": true,
+    "hasSelectedProjects": 1
+  },
+  "1440x900": {
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    },
+    "title": "KYRIES / 王琦 — Brand & Visual Designer",
+    "folderBox": {
+      "x": 606.7529296875,
+      "y": 514.85546875,
+      "width": 225,
+      "height": 162
+    },
+    "scrollWidth": 1440,
+    "hasIdentity": true,
+    "hasSelectedProjects": 1
+  },
+  "1920x1080": {
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "title": "KYRIES / 王琦 — Brand & Visual Designer",
+    "folderBox": {
+      "x": 809.00390625,
+      "y": 603.140625,
+      "width": 300,
+      "height": 216
+    },
+    "scrollWidth": 1920,
+    "hasIdentity": true,
+    "hasSelectedProjects": 1
+  },
+  "2560x1440": {
+    "viewport": {
+      "width": 2560,
+      "height": 1440
+    },
+    "title": "KYRIES / 王琦 — Brand & Visual Designer",
+    "folderBox": {
+      "x": 1125.858154296875,
+      "y": 603.8310546875,
+      "width": 306.25,
+      "height": 220.5
+    },
+    "scrollWidth": 2560,
+    "hasIdentity": true,
+    "hasSelectedProjects": 1
+  },
+  "desktopTarget": {
+    "text": "品牌设计\nBrand Design\n05\nProjects\nView Works",
+    "box": {
+      "x": 606.7529296875,
+      "y": 514.85546875,
+      "width": 225,
+      "height": 162
+    }
+  },
+  "category": {
+    "visible": true,
+    "title": "品牌设计",
+    "counter": "03 / 07 PROJECTS",
+    "gridCount": 7,
+    "viewProjectVisible": true
+  },
+  "keyboardCarousel": {
+    "centerBefore": "brand-44",
+    "centerAfter": "brand-58",
+    "changed": true
+  },
+  "projectDesktop": {
+    "visible": true,
+    "title": "九州通·九州美学\n品牌设计",
+    "metaCount": 4,
+    "sectionCount": 5
+  },
+  "mobileHome": {
+    "introVisible": true,
+    "categoryCount": 3,
+    "selectedCount": 3,
+    "scrollWidth": 390
+  },
+  "mobileCategoryTarget": {
+    "text": "品牌设计\nBrand Design\n05\nProjects",
+    "box": {
+      "x": 18,
+      "y": 536.3125,
+      "width": 354,
+      "height": 138
+    }
+  },
+  "mobileCategory": {
+    "visible": true,
+    "cardCount": 7
+  },
+  "mobileProject": {
+    "visible": true,
+    "title": "厨道湘菜\n品牌设计",
+    "scrollWidth": 390
+  },
+  "mobileBack": {
+    "categoryVisible": true
+  },
+  "errors": []
+}

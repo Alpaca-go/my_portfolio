@@ -3,92 +3,52 @@ import BrandDetailPage from "./components/BrandDetailPage";
 import CollectionShowcase from "./components/CollectionShowcase";
 import ChudaoDetailPage from "./components/FengTangDetailPage";
 import JointownDetailPage from "./components/JointownDetailPage";
+import HomeSections from "./components/HomeSections";
+import { GlobalHeader } from "./components/SiteChrome";
+import { profile } from "./data/portfolioData";
 
-const brandCarouselImages = [
-  "/assets/brand-carousel-16.png",
-  "/assets/brand-carousel-32.png",
+const criticalImages = [
   "/assets/brand-carousel-44-light.png",
-  "/assets/brand-carousel-58.png",
-  "/assets/brand-carousel-83.png",
-  "/assets/brand-carousel-05.png",
+  "/assets/brand-carousel-16.png",
   "/assets/brand-carousel-71.png"
-];
-
-const chudaoDetailImages = [
-  "/assets/feng-tang-detail/hero-poster.png",
-  "/assets/feng-tang-detail/brand-identity.png",
-  "/assets/feng-tang-detail/brand-overview.png",
-  "/assets/feng-tang-detail/dish-logo.png",
-  "/assets/feng-tang-detail/typography.png",
-  "/assets/feng-tang-detail/poster-series.png",
-  "/assets/feng-tang-detail/auxiliary-graphics.png",
-  "/assets/feng-tang-detail/package-boxes.png",
-  "/assets/feng-tang-detail/package-labels.png",
-  "/assets/feng-tang-detail/storefront.png"
-];
-
-const jointownDetailImages = [
-  "/assets/jointown-detail/hero.png",
-  "/assets/jointown-detail/gift-set.png",
-  "/assets/jointown-detail/business-cards.png",
-  "/assets/jointown-detail/handbag.png",
-  "/assets/jointown-detail/wayfinding.png",
-  "/assets/jointown-detail/brand-overview.png",
-  "/assets/jointown-detail/logo-silk.png",
-  "/assets/jointown-detail/color-palette.png",
-  "/assets/jointown-detail/logo-combination.png",
-  "/assets/jointown-detail/symbol-grid.png",
-  "/assets/jointown-detail/typography.png",
-  "/assets/jointown-detail/peacock-violet.png",
-  "/assets/jointown-detail/storefront.png"
 ];
 
 const badgeData = [
   {
     key: "vision",
     className: "badge badge-vision",
-    icon: "/assets/aa-badge.png",
-    caption: "Turning ideas into memorable visual identities",
-    text: "让品牌拥有清晰的视觉语言"
-  },
-  {
-    key: "brand",
-    className: "badge badge-brand",
-    icon: "/assets/bear-badge.png",
-    caption: "Designing characters that grow with brands",
-    text: "创造能够持续成长的品牌角色"
+    caption: "品牌视觉",
+    text: "Brand Identity"
   },
   {
     key: "packaging",
     className: "badge badge-packaging",
-    icon: "/assets/box-badge.png",
-    caption: "From concept to production-ready packaging",
-    text: "从概念到落地，构建完整包装系统"
+    caption: "包装系统",
+    text: "Packaging Systems"
   },
   {
-    key: "illustration",
-    className: "badge badge-illustration",
-    icon: "/assets/palette-badge.png",
-    caption: "Crafting illustrations that bring stories to life",
-    text: "为每个故事赋予独特的视觉表达"
+    key: "ip",
+    className: "badge badge-ip",
+    caption: "IP 形象",
+    text: "IP Character Design"
   }
 ];
 
 function Header() {
   return (
-    <header className="header">
-      <div className="designer-name">DESIGNER KYRIES</div>
-      <div className="collection-pill">2026 WORK COLLECTION</div>
-    </header>
+    <section className="hero-identity" aria-label="Designer introduction">
+      <span>KYRIES / 王琦</span>
+      <h1>{profile.role}</h1>
+      <p>{profile.roleCn}</p>
+    </section>
   );
 }
 
-function FeatureBadge({ className, icon, caption, text, delay }) {
+function FeatureBadge({ className, caption, text, delay }) {
   return (
     <section className={className} style={{ "--badge-delay": `${delay}ms` }}>
       <div className="badge-caption">{caption}</div>
       <div className="badge-row">
-        <img className="badge-icon" src={icon} alt="" />
         <div className="badge-pill">
           <span>{text}</span>
         </div>
@@ -107,10 +67,9 @@ function PortfolioWordmark() {
 
 function Hero({ onCardOpen, openingKey, closingKey, hideOpeningSheets }) {
   const badgeDelayOrder = {
-    brand: 0,
+    vision: 0,
     packaging: 1,
-    vision: 2,
-    illustration: 3
+    ip: 2
   };
 
   return (
@@ -119,7 +78,6 @@ function Hero({ onCardOpen, openingKey, closingKey, hideOpeningSheets }) {
         <FeatureBadge
           key={item.key}
           className={item.className}
-          icon={item.icon}
           caption={item.caption}
           text={item.text}
           delay={badgeDelayOrder[item.key] * 220}
@@ -194,8 +152,25 @@ function getOriginFromBoundingBox(rect, width, height, rotate) {
   };
 }
 
+function getCanvasScale(canvasRect) {
+  const scale = canvasRect.width / 2560;
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
+function normalizeRectToCanvas(rect, canvasRect) {
+  const scale = getCanvasScale(canvasRect);
+  return {
+    left: (rect.left - canvasRect.left) / scale,
+    top: (rect.top - canvasRect.top) / scale,
+    width: rect.width / scale,
+    height: rect.height / scale,
+    right: (rect.right - canvasRect.left) / scale,
+    bottom: (rect.bottom - canvasRect.top) / scale
+  };
+}
+
 function readMotionBox(element, canvasRect, fallbackRotate = 0) {
-  const rect = element.getBoundingClientRect();
+  const rect = normalizeRectToCanvas(element.getBoundingClientRect(), canvasRect);
   const styles = window.getComputedStyle(element);
   const width = Number.parseFloat(styles.width) || rect.width;
   const height = Number.parseFloat(styles.height) || rect.height;
@@ -205,8 +180,8 @@ function readMotionBox(element, canvasRect, fallbackRotate = 0) {
   const origin = getOriginFromBoundingBox(rect, width, height, rotate);
 
   return {
-    left: origin.left - canvasRect.left,
-    top: origin.top - canvasRect.top,
+    left: origin.left,
+    top: origin.top,
     width,
     height,
     rotate
@@ -299,9 +274,9 @@ function measureCenterFolderStack() {
   }
 
   const canvasRect = canvas.getBoundingClientRect();
-  const showcaseRect = showcase.getBoundingClientRect();
-  const showcaseLeft = showcaseRect.left - canvasRect.left;
-  const showcaseTop = showcaseRect.top - canvasRect.top;
+  const showcaseRect = normalizeRectToCanvas(showcase.getBoundingClientRect(), canvasRect);
+  const showcaseLeft = showcaseRect.left;
+  const showcaseTop = showcaseRect.top;
   const folderWidth = 400;
   const folderHeight = 288;
   const folderBottom = 152;
@@ -401,8 +376,8 @@ function measureJointownProjectTransition() {
   }
 
   const canvasRect = canvas.getBoundingClientRect();
-  const sourceRect = source.getBoundingClientRect();
-  const sourceImageRect = sourceImage.getBoundingClientRect();
+  const sourceRect = normalizeRectToCanvas(source.getBoundingClientRect(), canvasRect);
+  const sourceImageRect = normalizeRectToCanvas(sourceImage.getBoundingClientRect(), canvasRect);
   const sourceBorder = Number.parseFloat(window.getComputedStyle(source).borderLeftWidth) || 0;
 
   return [{
@@ -454,8 +429,8 @@ function measureJointownReturnTransition() {
   }
 
   const canvasRect = canvas.getBoundingClientRect();
-  const targetRect = target.getBoundingClientRect();
-  const targetImageRect = targetImage.getBoundingClientRect();
+  const targetRect = normalizeRectToCanvas(target.getBoundingClientRect(), canvasRect);
+  const targetImageRect = normalizeRectToCanvas(targetImage.getBoundingClientRect(), canvasRect);
   const targetBorder = Number.parseFloat(window.getComputedStyle(target).borderLeftWidth) || 0;
 
   return [{
@@ -471,8 +446,8 @@ function measureJointownReturnTransition() {
     fromImage: {
       left: 0,
       top: 0,
-      width: hero.getBoundingClientRect().width,
-      height: hero.getBoundingClientRect().height
+      width: normalizeRectToCanvas(hero.getBoundingClientRect(), canvasRect).width,
+      height: normalizeRectToCanvas(hero.getBoundingClientRect(), canvasRect).height
     },
     targetImage: {
       left: targetImageRect.left - targetRect.left - targetBorder,
@@ -647,7 +622,28 @@ export default function App() {
   const [projectDetail, setProjectDetail] = React.useState(null);
   const [projectTransitioning, setProjectTransitioning] = React.useState(false);
   const [jointownClosing, setJointownClosing] = React.useState(false);
+  const [stageStyle, setStageStyle] = React.useState({
+    "--stage-scale": 1,
+    "--stage-left": "0px",
+    "--stage-top": "0px"
+  });
   const timersRef = React.useRef([]);
+
+  React.useLayoutEffect(() => {
+    const updateStage = () => {
+      const availableHeight = Math.max(640, Math.min(window.innerHeight - 80, 980));
+      const scale = Math.min(window.innerWidth / 2560, availableHeight / 1280);
+      setStageStyle({
+        "--stage-scale": scale,
+        "--stage-left": `${(window.innerWidth - 2560 * scale) / 2}px`,
+        "--stage-top": `${(availableHeight - 1280 * scale) / 2}px`
+      });
+    };
+
+    updateStage();
+    window.addEventListener("resize", updateStage);
+    return () => window.removeEventListener("resize", updateStage);
+  }, []);
 
   const clearTimers = React.useCallback(() => {
     timersRef.current.forEach((timer) => window.clearTimeout(timer));
@@ -663,13 +659,45 @@ export default function App() {
   React.useEffect(() => () => clearTimers(), [clearTimers]);
 
   React.useEffect(() => {
-    [...brandCarouselImages, ...chudaoDetailImages, ...jointownDetailImages].forEach((src) => {
+    criticalImages.forEach((src) => {
       const image = new Image();
-      image.decoding = "sync";
+      image.decoding = "async";
       image.src = src;
       image.decode?.().catch(() => undefined);
     });
   }, []);
+
+  React.useEffect(() => {
+    const pageMeta = projectDetail === "jointown"
+      ? {
+          title: "九州美学品牌设计 — KYRIES Portfolio",
+          description: "九州美学品牌视觉设计案例，包含品牌标识、视觉系统、包装与空间应用。",
+          image: "/assets/jointown-detail/hero.png"
+        }
+      : projectDetail === "chudao"
+        ? {
+            title: "厨道湘菜品牌设计 — KYRIES Portfolio",
+            description: "厨道湘菜品牌视觉设计案例，包含品牌识别、海报、包装与门店应用。",
+            image: "/assets/feng-tang-detail/hero-poster.png"
+          }
+        : detailVisible || openingKey
+          ? {
+              title: `${selectedCard?.label ?? "Selected Works"} — KYRIES Portfolio`,
+              description: "KYRIES 品牌视觉、包装设计与 IP 形象设计项目分类。",
+              image: "/assets/brand-carousel-44-light.png"
+            }
+          : {
+              title: "KYRIES / 王琦 — Brand & Visual Designer",
+              description: "KYRIES / 王琦的品牌视觉、包装设计与 IP 形象设计作品集。",
+              image: "/assets/jointown-detail/hero.png"
+            };
+
+    document.title = pageMeta.title;
+    document.querySelector('meta[name="description"]')?.setAttribute("content", pageMeta.description);
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", pageMeta.title);
+    document.querySelector('meta[property="og:description"]')?.setAttribute("content", pageMeta.description);
+    document.querySelector('meta[property="og:image"]')?.setAttribute("content", pageMeta.image);
+  }, [projectDetail, detailVisible, openingKey, selectedCard]);
 
   const finishJointownTransition = React.useCallback((transitionKind) => {
     clearTimers();
@@ -807,6 +835,17 @@ export default function App() {
   };
 
   const handleChudaoOpen = () => {
+    if (window.matchMedia("(max-width: 767px)").matches && !projectDetail && !detailClosing) {
+      clearTimers();
+      setOpeningKey(null);
+      setDetailCardsTransitioning(false);
+      setTransitionCards([]);
+      setTransitionActive(false);
+      setProjectTransitioning(false);
+      setProjectDetail("chudao");
+      return;
+    }
+
     if (projectDetail || projectTransitioning || detailCardsTransitioning || detailClosing) {
       return;
     }
@@ -841,6 +880,18 @@ export default function App() {
   };
 
   const handleJointownOpen = () => {
+    if (window.matchMedia("(max-width: 767px)").matches && !projectDetail && !detailClosing) {
+      clearTimers();
+      setOpeningKey(null);
+      setDetailCardsTransitioning(false);
+      setTransitionCards([]);
+      setTransitionActive(false);
+      setProjectTransitioning(false);
+      setJointownClosing(false);
+      setProjectDetail("jointown");
+      return;
+    }
+
     if (projectDetail || projectTransitioning || detailCardsTransitioning || detailClosing) {
       return;
     }
@@ -848,6 +899,7 @@ export default function App() {
     clearTimers();
     window.scrollTo(0, 0);
     setJointownClosing(false);
+
     const projectCards = measureJointownProjectTransition();
 
     if (!projectCards.length) {
@@ -908,9 +960,49 @@ export default function App() {
     }, 1100);
   };
 
+  const resetToHome = React.useCallback((target = "top") => {
+    clearTimers();
+    setDetailVisible(false);
+    setDetailClosing(false);
+    setDetailCardsTransitioning(false);
+    setOpeningKey(null);
+    setClosingKey(null);
+    setSelectedCard(null);
+    setTransitionCards([]);
+    setTransitionActive(false);
+    setHideOpeningSheets(false);
+    setProjectDetail(null);
+    setProjectTransitioning(false);
+    setJointownClosing(false);
+
+    window.requestAnimationFrame(() => {
+      document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [clearTimers]);
+
+  const handleSelectedProjectOpen = (action) => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+    if (action === "jointown" || action === "chudao") {
+      clearTimers();
+      setSelectedCard({ key: "brand", label: "Brand Design" });
+      setProjectDetail(action);
+      return;
+    }
+    handleCardOpen("brand", "Brand Design");
+  };
+
+  const hasDetail = Boolean(openingKey || detailVisible || detailClosing || projectDetail || projectTransitioning);
+  const activeCategory = selectedCard?.key === "packaging"
+    ? "包装设计"
+    : selectedCard?.key === "ip"
+      ? "IP 设计"
+      : "品牌设计";
+
   return (
-    <div className="page-shell">
-      <div className="page-canvas">
+    <div className={`page-shell ${hasDetail ? "has-detail" : "is-home"} ${projectDetail ? "project-detail-active" : ""}`} id="top">
+      <GlobalHeader isDetail={hasDetail} activeCategory={activeCategory} onNavigateHome={resetToHome} />
+      <div className="page-stage">
+      <div className="page-canvas" style={stageStyle}>
         <Header />
         <Hero
           onCardOpen={handleCardOpen}
@@ -937,16 +1029,26 @@ export default function App() {
           onMotionEnd={finishJointownTransition}
         />
         {projectDetail === "chudao" ? (
-          <ChudaoDetailPage onBack={() => setProjectDetail(null)} />
+          <ChudaoDetailPage
+            onBack={() => setProjectDetail(null)}
+            onPrevious={() => setProjectDetail("jointown")}
+            onNext={() => setProjectDetail("jointown")}
+          />
         ) : null}
         {projectDetail === "jointown" ? (
           <JointownDetailPage
             isEntering={projectTransitioning && !jointownClosing}
             isClosing={jointownClosing}
             onBack={handleJointownBack}
+            onPrevious={() => setProjectDetail("chudao")}
+            onNext={() => setProjectDetail("chudao")}
           />
         ) : null}
       </div>
+      </div>
+      {!hasDetail ? (
+        <HomeSections onProjectOpen={handleSelectedProjectOpen} onCategoryOpen={handleCardOpen} />
+      ) : null}
     </div>
   );
 }

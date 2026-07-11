@@ -21,7 +21,7 @@ export default function CollectionCard({
   titleCn,
   titleEn,
   tagCount = "05",
-  tagLabel = "tags",
+  tagLabel = "Projects",
   tabColor,
   panelGradient,
   sheetImages = [],
@@ -98,6 +98,7 @@ export default function CollectionCard({
             </div>
             {arrow ? (
               <div className="collection-card__arrow" aria-hidden="true">
+                <span>View Works</span>
                 <svg viewBox="-80 -1120 1120 1120">
                   <path d="M683-767.668L226.833-311.501q-10.5 10.5-24.5 10.5t-24.5-10.5q-10.5-10.5-10.5-24.5t10.5-24.5l456.167-456.167H228q-14.875 0-24.932-10.127-10.068-10.115-10.068-25.083 0-14.957 10.068-24.873 10.057-9.917 24.932-9.917h490q14.875 0 24.943 10.057Q753-866.543 753-851.668v490q0 14.875-10.127 24.932-10.115 10.068-25.083 10.068-14.957 0-24.874-10.068-9.917-10.057-9.916-24.932v-406Z" fill="#FFFFFF" />
                 </svg>

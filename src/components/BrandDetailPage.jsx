@@ -127,26 +127,34 @@ function CenterFanFrame({ card, isClickable, onOpen }) {
   );
 }
 
-function FanCard({ virtualIndex, activeIndex, onChudaoOpen, onJointownOpen, isInteractionDisabled }) {
+function FanCard({ virtualIndex, activeIndex, onChudaoOpen, onJointownOpen, onSelect, isInteractionDisabled }) {
   const card = getWrappedCard(virtualIndex);
   const slot = getSlotForVirtualIndex(virtualIndex, activeIndex);
   const projectOpen = card.key === "brand-16" ? onChudaoOpen : card.key === "brand-44" ? onJointownOpen : null;
   const isProjectCenter = Boolean(projectOpen) && slot === "center";
   const isClickable = isProjectCenter && !isInteractionDisabled;
+  const adjacentDirection = slot === "inner-left" ? "previous" : slot === "inner-right" ? "next" : null;
+  const isSelectable = Boolean(adjacentDirection) && !isInteractionDisabled;
   const className = [
     "brand-detail__fan-card",
     slot.includes("outer") ? "brand-detail__fan-card--edge" : "brand-detail__fan-card--motion-target",
     slot.includes("off") ? "brand-detail__fan-card--hidden" : "",
-    isClickable ? "brand-detail__fan-card--clickable" : "",
+    isClickable || isSelectable ? "brand-detail__fan-card--clickable" : "",
     `brand-detail__fan-card--${slot}`
   ].filter(Boolean).join(" ");
   const handleKeyDown = (event) => {
-    if (!isClickable || (event.key !== "Enter" && event.key !== " ")) {
+    if ((!isClickable && !isSelectable) || (event.key !== "Enter" && event.key !== " ")) {
       return;
     }
 
     event.preventDefault();
-    projectOpen?.();
+    if (isSelectable) onSelect?.(adjacentDirection);
+    else projectOpen?.();
+  };
+
+  const handleClick = () => {
+    if (isSelectable) onSelect?.(adjacentDirection);
+    else if (isClickable) projectOpen?.();
   };
 
   return (
@@ -155,10 +163,10 @@ function FanCard({ virtualIndex, activeIndex, onChudaoOpen, onJointownOpen, isIn
       data-fan-slot={slot}
       data-card-key={card.key}
       data-card-number={card.number}
-      role={isProjectCenter ? "button" : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      aria-label={isProjectCenter ? `Open ${card.alt} project detail` : undefined}
-      onClick={isClickable ? projectOpen : undefined}
+      role={isProjectCenter || isSelectable ? "button" : undefined}
+      tabIndex={isClickable || isSelectable ? 0 : undefined}
+      aria-label={isSelectable ? `${adjacentDirection === "previous" ? "Previous" : "Next"} project: ${card.title}` : isProjectCenter ? `Open ${card.alt} project detail` : undefined}
+      onClick={isClickable || isSelectable ? handleClick : undefined}
       onKeyDown={handleKeyDown}
     >
       <img
@@ -173,7 +181,7 @@ function FanCard({ virtualIndex, activeIndex, onChudaoOpen, onJointownOpen, isIn
   );
 }
 
-function FanCards({ activeIndex, carouselDirection, onChudaoOpen, onJointownOpen, isInteractionDisabled }) {
+function FanCards({ activeIndex, carouselDirection, onChudaoOpen, onJointownOpen, onSelect, isInteractionDisabled }) {
   const classes = [
     "brand-detail__fan",
     carouselDirection ? `is-moving-${carouselDirection}` : ""
@@ -189,6 +197,7 @@ function FanCards({ activeIndex, carouselDirection, onChudaoOpen, onJointownOpen
           isInteractionDisabled={isInteractionDisabled}
           onChudaoOpen={onChudaoOpen}
           onJointownOpen={onJointownOpen}
+          onSelect={onSelect}
           key={virtualIndex}
         />
       ))}
@@ -243,6 +252,7 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
   const [activeIndex, setActiveIndex] = React.useState(2);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
+  const dragStartRef = React.useRef(null);
   const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
   const centerCard = getWrappedCard(activeIndex);
   const isChudaoActive = centerCard.key === "brand-16";
@@ -301,17 +311,68 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
     }, 780);
   };
 
+  React.useEffect(() => {
+    if (!isVisible) return undefined;
+    const handleKeyDown = (event) => {
+      if (event.key === "ArrowLeft") slideCarousel("previous");
+      if (event.key === "ArrowRight") slideCarousel("next");
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isVisible, carouselDirection, isCardTransitioning, isClosing]);
+
+  const handlePointerDown = (event) => {
+    dragStartRef.current = event.clientX;
+  };
+
+  const handlePointerUp = (event) => {
+    if (dragStartRef.current == null) return;
+    const delta = event.clientX - dragStartRef.current;
+    dragStartRef.current = null;
+    if (Math.abs(delta) < 48) return;
+    slideCarousel(delta > 0 ? "previous" : "next");
+  };
+
+  const normalizedActiveIndex = ((activeIndex % carouselCards.length) + carouselCards.length) % carouselCards.length;
+
   return (
     <>
       <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
         <div className="brand-detail__veil" />
-        <section className="brand-detail__content" aria-label={detailCopy.title}>
+        <section className="brand-detail__mobile" aria-label={`${detailCopy.title}项目列表`}>
+          <button className="brand-detail__mobile-back" type="button" onClick={onBack}>Back to Works / 返回作品</button>
+          <header>
+            <span>{detailCopy.caption}</span>
+            <h1><DetailTitle title={detailCopy.title} /></h1>
+            <p>{detailCopy.pill}</p>
+            <small>{String(carouselCards.length).padStart(2, "0")} PROJECTS</small>
+          </header>
+          <div className="brand-detail__mobile-grid">
+            {carouselCards.map((card) => {
+              const openProject = card.key === "brand-16" ? onChudaoOpen : card.key === "brand-44" ? onJointownOpen : null;
+              return (
+                <article key={card.key}>
+                  <img src={card.image} alt={card.alt} loading="lazy" />
+                  <div><span>{card.number}</span><strong>{card.title}</strong><small>{card.subtitle} · {card.badge}</small></div>
+                  {openProject ? <button type="button" onClick={openProject}>View Project / 查看项目</button> : <span>Project Preview</span>}
+                </article>
+              );
+            })}
+          </div>
+        </section>
+        <section
+          className="brand-detail__content"
+          aria-label={detailCopy.title}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+        >
         <FanCards
           activeIndex={activeIndex}
           carouselDirection={carouselDirection}
           isInteractionDisabled={isInteractionDisabled}
           onChudaoOpen={onChudaoOpen}
           onJointownOpen={onJointownOpen}
+          onSelect={slideCarousel}
         />
         <CenterFanFrame
           card={centerCard}
@@ -321,17 +382,33 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
         <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
         <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
         <div className="brand-detail__copy">
+          <span className="brand-detail__project-count">{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(carouselCards.length).padStart(2, "0")} PROJECTS</span>
           <h1>
             <DetailTitle title={detailCopy.title} />
           </h1>
           <div className="brand-detail__pill">{detailCopy.pill}</div>
           <p>{detailCopy.caption}</p>
+          {centerProjectOpen ? (
+            <button className="brand-detail__view-project" type="button" onClick={centerProjectOpen} disabled={isInteractionDisabled}>
+              <span>View Project</span><span>查看项目</span>
+            </button>
+          ) : null}
         </div>
-        <button className="brand-detail__down" aria-label="Back to home" onClick={onBack}>
-          <svg viewBox="0 -960 960 960" aria-hidden="true">
-            <path d="M450-274v-496q0-13 8.5-21.5T480-800q13 0 21.5 8.5T510-770v496l227-227q9-9 21-9t21 9q9 9 9 21t-9 21L501-181q-5 5-10 7t-11 2q-6 0-11-2t-10-7L181-459q-9-9-9-21t9-21q9-9 21-9t21 9l227 227Z" fill="#fff" />
-          </svg>
+        <button className="brand-detail__down" aria-label="Back to works" onClick={onBack}>
+          <span>Back to Works</span><span>返回作品</span>
         </button>
+        </section>
+        <section className="brand-detail__grid-section" aria-labelledby="all-brand-projects-title">
+          <header><span>ALL PROJECTS</span><h2 id="all-brand-projects-title">全部品牌项目</h2></header>
+          <div className="brand-detail__project-grid">
+            {carouselCards.map((card, index) => (
+              <button type="button" onClick={() => setActiveIndex(index)} key={card.key}>
+                <img src={card.image} alt={card.alt} loading="lazy" />
+                <span><strong>{card.title}</strong><small>{card.subtitle} · {card.badge}</small></span>
+                <span>{card.number}</span>
+              </button>
+            ))}
+          </div>
         </section>
       </main>
       {showOpeningFrame ? createPortal(
