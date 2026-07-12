@@ -5,7 +5,6 @@ import ChudaoDetailPage from "./components/FengTangDetailPage";
 import JointownDetailPage from "./components/JointownDetailPage";
 import HomeSections from "./components/HomeSections";
 import { GlobalHeader } from "./components/SiteChrome";
-import { profile } from "./data/portfolioData";
 
 const criticalImages = [
   "/assets/brand-carousel-44-light.png",
@@ -13,42 +12,47 @@ const criticalImages = [
   "/assets/brand-carousel-71.png"
 ];
 
+const HERO_MAX_WIDTH = 1440;
+const HERO_MAX_LIFT = 72;
+const HERO_CONTENT_SCALE = 1.5;
+
 const badgeData = [
   {
     key: "vision",
     className: "badge badge-vision",
-    caption: "品牌视觉",
-    text: "Brand Identity"
+    icon: "/assets/aa-badge.png",
+    caption: "Turning ideas into memorable visual identities",
+    text: "让品牌拥有清晰的视觉语言"
+  },
+  {
+    key: "brand",
+    className: "badge badge-brand",
+    icon: "/assets/bear-badge.png",
+    caption: "Designing characters that grow with brands",
+    text: "创造能够持续成长的品牌角色"
   },
   {
     key: "packaging",
     className: "badge badge-packaging",
-    caption: "包装系统",
-    text: "Packaging Systems"
+    icon: "/assets/box-badge.png",
+    caption: "From concept to production-ready packaging",
+    text: "从概念到落地，构建完整包装系统"
   },
   {
-    key: "ip",
-    className: "badge badge-ip",
-    caption: "IP 形象",
-    text: "IP Character Design"
+    key: "illustration",
+    className: "badge badge-illustration",
+    icon: "/assets/palette-badge.png",
+    caption: "Crafting illustrations that bring stories to life",
+    text: "为每个故事赋予独特的视觉表达"
   }
 ];
 
-function Header() {
-  return (
-    <section className="hero-identity" aria-label="Designer introduction">
-      <span>KYRIES / 王琦</span>
-      <h1>{profile.role}</h1>
-      <p>{profile.roleCn}</p>
-    </section>
-  );
-}
-
-function FeatureBadge({ className, caption, text, delay }) {
+function FeatureBadge({ className, icon, caption, text, delay }) {
   return (
     <section className={className} style={{ "--badge-delay": `${delay}ms` }}>
       <div className="badge-caption">{caption}</div>
       <div className="badge-row">
+        <img className="badge-icon" src={icon} alt="" />
         <div className="badge-pill">
           <span>{text}</span>
         </div>
@@ -59,8 +63,8 @@ function FeatureBadge({ className, caption, text, delay }) {
 
 function PortfolioWordmark() {
   return (
-    <div className="portfolio-wordmark" aria-label="Portfolio">
-      <img src="/assets/Portfolio-04.svg" alt="Portfolio" />
+    <div className="portfolio-wordmark" aria-hidden="true">
+      <img src="/assets/Portfolio-04.svg" alt="" draggable="false" />
     </div>
   );
 }
@@ -68,8 +72,9 @@ function PortfolioWordmark() {
 function Hero({ onCardOpen, openingKey, closingKey, hideOpeningSheets }) {
   const badgeDelayOrder = {
     vision: 0,
-    packaging: 1,
-    ip: 2
+    brand: 1,
+    packaging: 2,
+    illustration: 3
   };
 
   return (
@@ -78,6 +83,7 @@ function Hero({ onCardOpen, openingKey, closingKey, hideOpeningSheets }) {
         <FeatureBadge
           key={item.key}
           className={item.className}
+          icon={item.icon}
           caption={item.caption}
           text={item.text}
           delay={badgeDelayOrder[item.key] * 220}
@@ -206,28 +212,12 @@ function measureFolderSheets(cardLabel) {
   const sourceCard = [...document.querySelectorAll(".collection-card")]
     .find((card) => card.getAttribute("data-card-key") === cardLabel);
 
-  if (!canvas || !sourceCard) {
-    return [];
-  }
+  if (!canvas || !sourceCard) return [];
 
   const canvasRect = canvas.getBoundingClientRect();
-  const selectors = [
-    ".collection-card__sheet-left",
-    ".collection-card__sheet-center",
-    ".collection-card__sheet-right"
-  ];
-
-  return selectors.flatMap((selector) => {
-    const source = sourceCard.querySelector(selector);
-
-    if (!source) {
-      return [];
-    }
-
-    return [{
-      ...readMotionBox(source, canvasRect),
-      image: readElementImage(source)
-    }];
+  return ["left", "center", "right"].flatMap((position) => {
+    const source = sourceCard.querySelector(`.collection-card__sheet-${position}`);
+    return source ? [{ ...readMotionBox(source, canvasRect), image: readElementImage(source) }] : [];
   });
 }
 
@@ -239,6 +229,19 @@ function measureFanCards() {
   }
 
   const canvasRect = canvas.getBoundingClientRect();
+  const readLayoutAnchor = (element) => {
+    let left = 0;
+    let top = 0;
+    let current = element;
+
+    while (current && current !== canvas) {
+      left += current.offsetLeft;
+      top += current.offsetTop;
+      current = current.offsetParent;
+    }
+
+    return current === canvas ? { left, top } : null;
+  };
   const selectors = [
     "[data-fan-slot='inner-left']",
     "[data-fan-slot='center']",
@@ -256,11 +259,40 @@ function measureFanCards() {
       ? target.querySelector(".brand-detail__fan-card-media") ?? target
       : target;
 
+    const isCoverflowCard = target.classList.contains("coverflow-gallery__card");
+    const projectedRect = normalizeRectToCanvas(motionTarget.getBoundingClientRect(), canvasRect);
+    const targetStyles = window.getComputedStyle(motionTarget);
+    const layoutAnchor = isCoverflowCard ? readLayoutAnchor(motionTarget) : null;
+    const recordedWidth = Number.parseFloat(target.dataset.cardWidth);
+    const recordedHeight = Number.parseFloat(target.dataset.cardHeight);
+    const motionBox = isCoverflowCard && layoutAnchor
+      ? {
+          left: layoutAnchor.left,
+          top: layoutAnchor.top,
+          width: recordedWidth,
+          height: recordedHeight,
+          rotate: 0,
+          targetTransform: targetStyles.transform,
+          targetTransformOrigin: targetStyles.transformOrigin,
+          recordedScale: Number.parseFloat(target.dataset.cardScale),
+          recordedRotateY: Number.parseFloat(target.dataset.cardRotateY),
+          recordedRotateZ: Number.parseFloat(target.dataset.cardRotateZ),
+          recordedRadius: Number.parseFloat(target.dataset.cardRadius),
+          recordedDepth: Number.parseFloat(target.dataset.cardDepth),
+          recordedOffsetX: Number.parseFloat(target.dataset.cardOffsetX),
+          projectedRect
+        }
+      : readMotionBox(motionTarget, canvasRect);
+
     return [{
-      ...readMotionBox(motionTarget, canvasRect),
+      ...motionBox,
       image: readElementImage(motionTarget),
+      title: motionTarget.querySelector(".coverflow-gallery__title")?.textContent ?? "",
       cardKey: target.getAttribute("data-card-key") ?? "",
-      background: window.getComputedStyle(target).backgroundColor
+      background: window.getComputedStyle(target).backgroundColor,
+      dimOpacity: window.getComputedStyle(target.querySelector(".coverflow-gallery__dim")).opacity,
+      isProjectedCoverflowCard: isCoverflowCard,
+      returnBox: isCoverflowCard ? { ...projectedRect, rotate: 0 } : null
     }];
   });
 }
@@ -300,36 +332,28 @@ function measureCardTransition(cardLabel) {
   const sourceBoxes = measureFolderSheets(cardLabel);
   const targetBoxes = measureFanCards();
 
-  return sourceBoxes.flatMap((sourceBox, index) => (
-    targetBoxes[index] ? [{
-      from: sourceBox,
-      to: targetBoxes[index],
-      image: targetBoxes[index].image ?? sourceBox.image,
-      cardKey: targetBoxes[index].cardKey,
-      targetBackground: targetBoxes[index].background,
-      targetOverlay: index === 1 ? "0" : "0.45",
-      targetImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)"
-    }] : []
-  ));
-}
+  return sourceBoxes.flatMap((sourceBox, index) => {
+    const targetBox = targetBoxes[index];
+    if (!targetBox) return [];
 
-function measureCenteredCardTransition() {
-  const sourceBoxes = measureCenterFolderStack();
-  const targetBoxes = measureFanCards();
-
-  return sourceBoxes.flatMap((sourceBox, index) => (
-    targetBoxes[index] ? [{
+    return [{
       from: sourceBox,
-      to: targetBoxes[index],
-      fromOpacity: "0.72",
-      targetOpacity: "1",
-      opacityDuration: "100ms",
-      opacityDelayExtra: "20ms",
-      targetBackground: targetBoxes[index].background,
-      targetOverlay: index === 1 ? "0" : "0.45",
-      targetImageFilter: index === 1 ? "grayscale(0) contrast(1)" : "grayscale(1) contrast(1.02)"
-    }] : []
-  ));
+      to: targetBox,
+      image: targetBox.image ?? sourceBox.image,
+      cardKey: targetBox.cardKey,
+      title: targetBox.title,
+      targetBackground: targetBox.background,
+      targetOverlay: targetBox.dimOpacity,
+      targetOverlayColor: "0, 0, 0",
+      targetImageFilter: "grayscale(0) contrast(1)",
+      fromBorderWidth: "0px",
+      targetBorderWidth: "0px",
+      targetRadius: `${targetBox.recordedRadius}px`,
+      targetShadow: "none",
+      targetTransform: targetBox.targetTransform,
+      targetTransformOrigin: targetBox.targetTransformOrigin
+    }];
+  });
 }
 
 function measureChudaoProjectTransition() {
@@ -468,7 +492,7 @@ function measureJointownReturnTransition() {
   }];
 }
 
-function CardTransitionLayer({ cards, isActive, onMotionEnd }) {
+function CardTransitionLayer({ cards, isActive, onMotionEnd, onComplete }) {
   if (!cards.length) {
     return null;
   }
@@ -524,6 +548,16 @@ function CardTransitionLayer({ cards, isActive, onMotionEnd }) {
           onTransitionEnd={(event) => {
             if (
               !card.transitionKind
+              && index === cards.length - 1
+              && event.target === event.currentTarget
+              && event.propertyName === "transform"
+            ) {
+              onComplete?.();
+              return;
+            }
+
+            if (
+              !card.transitionKind
               || usesTransformMotion
               || event.target !== event.currentTarget
               || event.propertyName !== "width"
@@ -553,8 +587,11 @@ function CardTransitionLayer({ cards, isActive, onMotionEnd }) {
             "--target-width": `${card.to.width}px`,
             "--target-height": `${card.to.height}px`,
             "--target-rotate": `${card.to.rotate}deg`,
+            "--target-transform": card.targetTransform,
+            "--target-transform-origin": card.targetTransformOrigin ?? "0 0",
             "--target-background": card.targetBackground ?? (index === 1 ? "#f6f6f6" : "#ddd"),
             "--target-overlay": card.targetOverlay ?? "0",
+            "--target-overlay-color": card.targetOverlayColor ?? "255, 255, 255",
             "--from-image-filter": card.fromImageFilter ?? "grayscale(0) contrast(1)",
             "--target-image-filter": card.targetImageFilter ?? "grayscale(0) contrast(1)",
             "--from-image-left": card.fromImage ? `${card.fromImage.left}px` : undefined,
@@ -603,6 +640,7 @@ function CardTransitionLayer({ cards, isActive, onMotionEnd }) {
               }}
             />
           ) : null}
+          {!card.transitionKind && card.title ? <div className="coverflow-gallery__title">{card.title}</div> : null}
         </div>
       })}
     </div>
@@ -625,7 +663,9 @@ export default function App() {
   const [stageStyle, setStageStyle] = React.useState({
     "--stage-scale": 1,
     "--stage-left": "0px",
-    "--stage-top": "0px"
+    "--stage-top": "0px",
+    "--hero-scale": 1,
+    "--hero-translate-y": "0px"
   });
   const timersRef = React.useRef([]);
 
@@ -633,10 +673,16 @@ export default function App() {
     const updateStage = () => {
       const availableHeight = Math.max(640, Math.min(window.innerHeight - 80, 980));
       const scale = Math.min(window.innerWidth / 2560, availableHeight / 1280);
+      const renderedCanvasWidth = 2560 * scale;
+      const responsiveHeroScale = Math.min(1, HERO_MAX_WIDTH / renderedCanvasWidth);
+      const heroScale = responsiveHeroScale * HERO_CONTENT_SCALE;
+      const heroLift = Math.min(HERO_MAX_LIFT, Math.max(36, window.innerHeight * 0.06));
       setStageStyle({
         "--stage-scale": scale,
         "--stage-left": `${(window.innerWidth - 2560 * scale) / 2}px`,
-        "--stage-top": `${(availableHeight - 1280 * scale) / 2}px`
+        "--stage-top": `${(availableHeight - 1280 * scale) / 2}px`,
+        "--hero-scale": heroScale,
+        "--hero-translate-y": `${-heroLift / scale}px`
       });
     };
 
@@ -723,6 +769,14 @@ export default function App() {
     }
 
     clearTimers();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    const detailPage = document.querySelector(".brand-detail");
+    if (detailPage) {
+      detailPage.scrollTop = 0;
+      detailPage.scrollLeft = 0;
+    }
     setProjectDetail(null);
     setProjectTransitioning(false);
 
@@ -737,22 +791,26 @@ export default function App() {
     const isCenteredCard = key === "brand";
     const sideCardSettleDelay = isCenteredCard ? 320 : 480;
     const detailRevealDelay = sideCardSettleDelay + 330;
-    const fanRevealDelay = Math.max(sideCardSettleDelay + 1040, 1320);
+    const fanRevealDelay = Math.max(sideCardSettleDelay + 1400, 1720);
 
     queueTimer(() => {
-      const measuredCards = measureCardTransition(cardLabel);
-      setTransitionCards(measuredCards);
+      if (detailPage) {
+        detailPage.scrollTop = 0;
+        detailPage.scrollLeft = 0;
+      }
+      setTransitionCards(measureCardTransition(cardLabel));
 
       window.requestAnimationFrame(() => {
         setHideOpeningSheets(true);
-
-        window.requestAnimationFrame(() => {
-          setTransitionActive(true);
-        });
+        window.requestAnimationFrame(() => setTransitionActive(true));
       });
     }, sideCardSettleDelay);
 
     queueTimer(() => {
+      if (detailPage) {
+        detailPage.scrollTop = 0;
+        detailPage.scrollLeft = 0;
+      }
       window.scrollTo(0, 0);
       setDetailVisible(true);
     }, detailRevealDelay);
@@ -784,7 +842,7 @@ export default function App() {
       }
 
       return [{
-        from: fanCard,
+        from: fanCard.returnBox ?? fanCard,
         to: returnTarget,
         image: fanCard.image,
         fromBackground: fanCard.background ?? (index === 1 ? "#f6f6f6" : "#ddd"),
@@ -980,6 +1038,19 @@ export default function App() {
     });
   }, [clearTimers]);
 
+  const finishFolderTransition = React.useCallback(() => {
+    clearTimers();
+    setOpeningKey(null);
+    setDetailCardsTransitioning(false);
+    setHideOpeningSheets(false);
+  }, [clearTimers]);
+
+  const releasePinnedCarousel = React.useCallback(() => {
+    setDetailCardsTransitioning(false);
+    setTransitionCards([]);
+    setTransitionActive(false);
+  }, []);
+
   const handleSelectedProjectOpen = (action) => {
     window.scrollTo({ top: 0, behavior: "auto" });
     if (action === "jointown" || action === "chudao") {
@@ -1003,7 +1074,6 @@ export default function App() {
       <GlobalHeader isDetail={hasDetail} activeCategory={activeCategory} onNavigateHome={resetToHome} />
       <div className="page-stage">
       <div className="page-canvas" style={stageStyle}>
-        <Header />
         <Hero
           onCardOpen={handleCardOpen}
           openingKey={openingKey}
@@ -1017,16 +1087,19 @@ export default function App() {
           isCardTransitioning={detailCardsTransitioning}
           isProjectTransitioning={projectTransitioning}
           hasProjectDetail={Boolean(projectDetail)}
+          hasPinnedCarousel={Boolean(transitionCards.length && transitionActive && !detailCardsTransitioning)}
           isProjectOpening={projectTransitioning && !jointownClosing}
           isProjectClosing={jointownClosing}
           onBack={handleDetailBack}
           onChudaoOpen={handleChudaoOpen}
           onJointownOpen={handleJointownOpen}
+          onCarouselInteract={releasePinnedCarousel}
         />
         <CardTransitionLayer
           cards={transitionCards}
           isActive={transitionActive}
           onMotionEnd={finishJointownTransition}
+          onComplete={finishFolderTransition}
         />
         {projectDetail === "chudao" ? (
           <ChudaoDetailPage

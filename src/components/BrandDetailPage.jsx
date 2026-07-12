@@ -1,5 +1,5 @@
 import React from "react";
-import { createPortal } from "react-dom";
+import CoverflowGallery from "./CoverflowGallery";
 
 const carouselCards = [
   {
@@ -67,154 +67,8 @@ const carouselCards = [
   }
 ];
 
-const fanSlots = [
-  "off-left",
-  "outer-left",
-  "inner-left",
-  "center",
-  "inner-right",
-  "outer-right",
-  "off-right"
-];
-
 function getWrappedCard(index) {
   return carouselCards[((index % carouselCards.length) + carouselCards.length) % carouselCards.length];
-}
-
-function getSlotForVirtualIndex(virtualIndex, activeIndex) {
-  return fanSlots[virtualIndex - activeIndex + 3];
-}
-
-function CenterFanFrame({ card, isClickable, onOpen }) {
-  return (
-    <div className="brand-detail__center-frame" data-card-key={card.key}>
-      <div className="brand-detail__center-frame-base" aria-hidden="true">
-        <svg
-          className="brand-detail__center-frame-svg"
-          viewBox="0 0 380 470"
-          focusable="false"
-          aria-hidden="true"
-        >
-          <path d="M342,0H38C17,0,0,17,0,38v394c0,21,17,38,38,38h304c21,0,38-17,38-38V38C380,17,363,0,342,0z M368,336.4c0,17.5-14.2,31.6-31.6,31.6H43.6C26.2,368,12,353.8,12,336.4V43.6C12,26.2,26.2,12,43.6,12h292.7c17.5,0,31.6,14.2,31.6,31.6V336.4z" />
-        </svg>
-      </div>
-      <div className="brand-detail__center-frame-caption">
-        <div className="brand-detail__center-frame-text">
-          <span>{card.title}</span>
-          <span>{card.subtitle}</span>
-        </div>
-        {isClickable ? (
-          <button
-            className="brand-detail__center-frame-action brand-detail__center-frame-action--button"
-            type="button"
-            aria-label={`Open ${card.title} project detail`}
-            onClick={onOpen}
-          >
-            <svg viewBox="0 -960 880 880" aria-hidden="true">
-              <path d="M252.087-492.499l134.75 134.75q8.25 8.25 7.793 19.25t-8.709 19.25q-8.25 8.25-19.25 8.25t-19.25-8.25L165.921-500.749q-8.25-8.25-8.25-19.25t8.25-19.25l182.416-182.416q8.25-8.25 19.25-8.25t19.25 8.25q8.25 8.25 8.25 19.707t-8.25 19.709L252.087-547.499h454.668q11.916 0 19.707 7.791T734.255-519.999q0 11.916-7.793 19.709T706.755-492.499H252.087Z" />
-            </svg>
-          </button>
-        ) : (
-          <div className="brand-detail__center-frame-action" aria-hidden="true">
-            <svg viewBox="0 -960 880 880">
-              <path d="M252.087-492.499l134.75 134.75q8.25 8.25 7.793 19.25t-8.709 19.25q-8.25 8.25-19.25 8.25t-19.25-8.25L165.921-500.749q-8.25-8.25-8.25-19.25t8.25-19.25l182.416-182.416q8.25-8.25 19.25-8.25t19.25 8.25q8.25 8.25 8.25 19.707t-8.25 19.709L252.087-547.499h454.668q11.916 0 19.707 7.791T734.255-519.999q0 11.916-7.793 19.709T706.755-492.499H252.087Z" />
-            </svg>
-          </div>
-        )}
-      </div>
-      {card.badge ? <div className="brand-detail__center-frame-badge">{card.badge}</div> : null}
-    </div>
-  );
-}
-
-function FanCard({ virtualIndex, activeIndex, onChudaoOpen, onJointownOpen, onSelect, isInteractionDisabled }) {
-  const card = getWrappedCard(virtualIndex);
-  const slot = getSlotForVirtualIndex(virtualIndex, activeIndex);
-  const projectOpen = card.key === "brand-16" ? onChudaoOpen : card.key === "brand-44" ? onJointownOpen : null;
-  const isProjectCenter = Boolean(projectOpen) && slot === "center";
-  const isClickable = isProjectCenter && !isInteractionDisabled;
-  const adjacentDirection = slot === "inner-left" ? "previous" : slot === "inner-right" ? "next" : null;
-  const isSelectable = Boolean(adjacentDirection) && !isInteractionDisabled;
-  const className = [
-    "brand-detail__fan-card",
-    slot.includes("outer") ? "brand-detail__fan-card--edge" : "brand-detail__fan-card--motion-target",
-    slot.includes("off") ? "brand-detail__fan-card--hidden" : "",
-    isClickable || isSelectable ? "brand-detail__fan-card--clickable" : "",
-    `brand-detail__fan-card--${slot}`
-  ].filter(Boolean).join(" ");
-  const handleKeyDown = (event) => {
-    if ((!isClickable && !isSelectable) || (event.key !== "Enter" && event.key !== " ")) {
-      return;
-    }
-
-    event.preventDefault();
-    if (isSelectable) onSelect?.(adjacentDirection);
-    else projectOpen?.();
-  };
-
-  const handleClick = () => {
-    if (isSelectable) onSelect?.(adjacentDirection);
-    else if (isClickable) projectOpen?.();
-  };
-
-  return (
-    <div
-      className={className}
-      data-fan-slot={slot}
-      data-card-key={card.key}
-      data-card-number={card.number}
-      role={isProjectCenter || isSelectable ? "button" : undefined}
-      tabIndex={isClickable || isSelectable ? 0 : undefined}
-      aria-label={isSelectable ? `${adjacentDirection === "previous" ? "Previous" : "Next"} project: ${card.title}` : isProjectCenter ? `Open ${card.alt} project detail` : undefined}
-      onClick={isClickable || isSelectable ? handleClick : undefined}
-      onKeyDown={handleKeyDown}
-    >
-      <img
-        className="brand-detail__fan-card-image"
-        src={card.image}
-        alt={card.alt}
-        loading="eager"
-        decoding="sync"
-        fetchPriority="high"
-      />
-    </div>
-  );
-}
-
-function FanCards({ activeIndex, carouselDirection, onChudaoOpen, onJointownOpen, onSelect, isInteractionDisabled }) {
-  const classes = [
-    "brand-detail__fan",
-    carouselDirection ? `is-moving-${carouselDirection}` : ""
-  ].filter(Boolean).join(" ");
-  const visibleRange = Array.from({ length: 7 }, (_, index) => activeIndex - 3 + index);
-
-  return (
-    <div className={classes}>
-      {visibleRange.map((virtualIndex) => (
-        <FanCard
-          virtualIndex={virtualIndex}
-          activeIndex={activeIndex}
-          isInteractionDisabled={isInteractionDisabled}
-          onChudaoOpen={onChudaoOpen}
-          onJointownOpen={onJointownOpen}
-          onSelect={onSelect}
-          key={virtualIndex}
-        />
-      ))}
-    </div>
-  );
-}
-
-function CarouselHitZone({ direction, onClick, disabled = false }) {
-  return (
-    <button
-      className={`brand-detail__hit-zone brand-detail__hit-zone--${direction}`}
-      aria-label={direction === "left" ? "Previous card" : "Next card"}
-      onClick={onClick}
-      disabled={disabled}
-      type="button"
-    />
-  );
 }
 
 const detailCopyByKey = {
@@ -248,7 +102,7 @@ function DetailTitle({ title }) {
   );
 }
 
-export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, hasProjectDetail = false, isProjectOpening = false, isProjectClosing = false, onBack, onChudaoOpen, onJointownOpen }) {
+export default function BrandDetailPage({ activeCardKey = "brand", isVisible = true, isClosing = false, isCardTransitioning = false, isProjectTransitioning = false, hasProjectDetail = false, hasPinnedCarousel = false, isProjectOpening = false, isProjectClosing = false, onBack, onChudaoOpen, onJointownOpen, onCarouselInteract }) {
   const [activeIndex, setActiveIndex] = React.useState(2);
   const [carouselDirection, setCarouselDirection] = React.useState(null);
   const carouselTimerRef = React.useRef(null);
@@ -259,8 +113,6 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
   const isJointownActive = centerCard.key === "brand-44";
   const centerProjectOpen = isChudaoActive ? onChudaoOpen : isJointownActive ? onJointownOpen : null;
   const isInteractionDisabled = Boolean(carouselDirection || isCardTransitioning || isClosing);
-  const pageCanvas = typeof document === "undefined" ? null : document.querySelector(".page-canvas");
-  const showOpeningFrame = Boolean(pageCanvas && isCardTransitioning && !isClosing && !isProjectTransitioning);
   const classes = [
     "brand-detail",
     isVisible ? "is-visible" : "",
@@ -268,14 +120,13 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
     isCardTransitioning ? "is-card-transitioning" : "",
     isProjectTransitioning ? "is-project-transitioning" : "",
     hasProjectDetail ? "has-project-detail" : "",
+    hasPinnedCarousel ? "has-pinned-carousel" : "",
     isProjectOpening ? "is-project-opening" : "",
     isProjectClosing ? "is-project-closing" : ""
   ].filter(Boolean).join(" ");
 
   React.useEffect(() => () => {
-    if (carouselTimerRef.current) {
-      window.clearTimeout(carouselTimerRef.current);
-    }
+    if (carouselTimerRef.current) window.clearTimeout(carouselTimerRef.current);
   }, []);
 
   React.useEffect(() => {
@@ -287,39 +138,23 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
       window.clearTimeout(carouselTimerRef.current);
       carouselTimerRef.current = null;
     }
-
     setCarouselDirection(null);
     setActiveIndex(2);
   }, [isCardTransitioning, isVisible, isClosing]);
 
-  const slideCarousel = (direction) => {
-    if (carouselDirection || isCardTransitioning || isClosing) {
-      return;
-    }
-
+  const moveCarousel = (offset) => {
+    if (carouselDirection || isCardTransitioning || isClosing) return;
+    const direction = offset > 0 ? "next" : "previous";
     setCarouselDirection(direction);
-    const step = direction === "next" ? 1 : -1;
-    setActiveIndex((current) => current + step);
-
-    if (carouselTimerRef.current) {
-      window.clearTimeout(carouselTimerRef.current);
-    }
-
+    setActiveIndex((current) => current + offset);
+    if (carouselTimerRef.current) window.clearTimeout(carouselTimerRef.current);
     carouselTimerRef.current = window.setTimeout(() => {
       setCarouselDirection(null);
       carouselTimerRef.current = null;
-    }, 780);
+    }, 620);
   };
 
-  React.useEffect(() => {
-    if (!isVisible) return undefined;
-    const handleKeyDown = (event) => {
-      if (event.key === "ArrowLeft") slideCarousel("previous");
-      if (event.key === "ArrowRight") slideCarousel("next");
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isVisible, carouselDirection, isCardTransitioning, isClosing]);
+  const slideCarousel = (direction) => moveCarousel(direction === "next" ? 1 : -1);
 
   const handlePointerDown = (event) => {
     dragStartRef.current = event.clientX;
@@ -366,21 +201,10 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
           onPointerDown={handlePointerDown}
           onPointerUp={handlePointerUp}
         >
-        <FanCards
-          activeIndex={activeIndex}
-          carouselDirection={carouselDirection}
-          isInteractionDisabled={isInteractionDisabled}
-          onChudaoOpen={onChudaoOpen}
-          onJointownOpen={onJointownOpen}
-          onSelect={slideCarousel}
+        <CoverflowGallery
+          disabled={isInteractionDisabled}
+          onInteract={onCarouselInteract}
         />
-        <CenterFanFrame
-          card={centerCard}
-          isClickable={Boolean(centerProjectOpen) && !isInteractionDisabled}
-          onOpen={centerProjectOpen}
-        />
-        <CarouselHitZone direction="left" onClick={() => slideCarousel("previous")} disabled={isInteractionDisabled} />
-        <CarouselHitZone direction="right" onClick={() => slideCarousel("next")} disabled={isInteractionDisabled} />
         <div className="brand-detail__copy">
           <span className="brand-detail__project-count">{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(carouselCards.length).padStart(2, "0")} PROJECTS</span>
           <h1>
@@ -398,28 +222,7 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
           <span>Back to Works</span><span>返回作品</span>
         </button>
         </section>
-        <section className="brand-detail__grid-section" aria-labelledby="all-brand-projects-title">
-          <header><span>ALL PROJECTS</span><h2 id="all-brand-projects-title">全部品牌项目</h2></header>
-          <div className="brand-detail__project-grid">
-            {carouselCards.map((card, index) => (
-              <button type="button" onClick={() => setActiveIndex(index)} key={card.key}>
-                <img src={card.image} alt={card.alt} loading="lazy" />
-                <span><strong>{card.title}</strong><small>{card.subtitle} · {card.badge}</small></span>
-                <span>{card.number}</span>
-              </button>
-            ))}
-          </div>
-        </section>
       </main>
-      {showOpeningFrame ? createPortal(
-        <div
-          className={`brand-detail__center-frame-portal ${isVisible ? "is-visible" : ""}`}
-          aria-hidden="true"
-        >
-          <CenterFanFrame card={centerCard} isClickable={false} />
-        </div>,
-        pageCanvas
-      ) : null}
     </>
   );
 }

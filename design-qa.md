@@ -1,43 +1,43 @@
-# Design QA — 九州通详情页
+# Design QA — Five-card carousel fan
 
-- source visual truth path: `F:/my_portfolio/qa-artifacts/jointown-source.png`
-- implementation screenshot path: `F:/my_portfolio/qa-artifacts/jointown-final.png`
-- viewport: fixed application canvas `2560x1280`; in-app browser capture normalized from its reported `devicePixelRatio=0.297`
-- state: Brand Design folder expanded, `brand-44` selected, center card clicked, Jointown Aesthetics detail page visible
-- full-view comparison evidence: `F:/my_portfolio/qa-artifacts/jointown-comparison-final.png`
-- focused region comparison evidence: `F:/my_portfolio/qa-artifacts/jointown-top-comparison-final.png`
+- Source visual truth: `F:\Portfolio\765b38bffb45294a163f2a0d0f571615.jpg`
+- Implementation screenshot: `F:\my_portfolio\qa-carousel-implementation.png`
+- Viewport: 1772 × 1530
+- State: Brand Design detail, initial five-card carousel after the folder fly-out completes
+- Primary interaction tested: click the inner-right card; Olivia Carter moved to the center and the pinned fly-out layer released
+- Console errors: none
 
-**Findings**
+## Full-view comparison evidence
 
-- No actionable P0/P1/P2 visual mismatches remain.
-- No gallery placeholders remain; all 12 Paper-provided image assets are present and use the supplied crops.
-- Residual P3: raster antialiasing differs slightly between the supplied PNG export and the in-app browser capture, but component geometry, type hierarchy, imagery, colors, radii, and spacing align.
+The source and implementation were opened together and compared in the same review input. The implementation preserves the existing portfolio page while matching the reference carousel composition: one dominant upright center card, two overlapping inner cards, two smaller outer cards, symmetric fan rotation, descending top edges, and a shared bottom baseline.
 
-**Required Fidelity Surfaces**
+## Focused region comparison evidence
 
-- Fonts and typography: local `Zona Pro` is used for the designer mark; local `HarmonyOS Sans` is used for Chinese navigation, the `78px/700` project title, `24px` pill, and `24px/300/1.6` description. Line wrapping and two-line title structure match the source.
-- Spacing and layout rhythm: fixed `2560x1280` page; `1800px` visual field centered with `380px` side insets; `1720px` content width; three `568px` gallery columns with `8px` gaps; `12px` tile radii; header, summary, navigation, and gallery align to the Paper geometry.
-- Colors and visual tokens: page fill `#FBF9FF`, pill/border `#896EEB`, black typography, 75% black description, translucent close control, and transparent outlined navigation buttons match the source.
-- Image quality and asset fidelity: hero uses the user-provided `01.png`; all gallery images use Paper-provided original PNGs with their exported aspect ratios and `object-fit: cover`. No generated or placeholder imagery is used.
-- Copy and content: Chinese title, category names, pill, and two-line description match the visual source.
+A focused carousel-region capture was used because the reference image describes the five-card fan rather than the surrounding portfolio page. Card bounds were also measured in the rendered browser. The outer cards remain inside the carousel edges, the center card has the highest stacking level, and the two side levels use symmetric scale and rotation values.
 
-**Interaction Verification**
+## Required fidelity surfaces
 
-- The center `brand-44` card exposes a button role, keyboard focus, and click route to the detail page.
-- The separate bottom-right card arrow routes to the same detail page and has a `#5837BD` hover/focus state.
-- The selected card artwork morphs from `360x360 @ (1100,312)` to the detail hero target `1800x1280 @ (380,0)`, including border-radius and crop handoff.
-- Upper-page elements use ordered fade-up delays from `100ms` through `640ms`; the 12 gallery tiles use a fixed shuffled delay set from `760ms` through `1340ms`.
-- The detail close control and lower-left project navigation button return to the carousel.
-- Browser console errors and warnings: none.
+- Fonts and typography: existing portfolio typography is intentionally retained; card titles now occupy the reference-aligned upper-left position with a readable 24px weight.
+- Spacing and layout rhythm: passed. Five cards overlap in a compact fan; outer cards sit inside the layer edges; top offsets and bottom alignment follow the reference hierarchy.
+- Colors and visual tokens: passed for the requested scope. Existing portrait imagery and page palette are retained while the reference's clean, borderless card treatment is preserved.
+- Image quality and asset fidelity: passed. Existing full-resolution carousel images are used with cover cropping; no placeholder or generated substitute is present.
+- Copy and content: passed for the requested scope. Existing carousel names remain intact and legible.
 
-**Comparison History**
+## Comparison history
 
-- Pass 1 (`jointown-comparison-pass1.png`): found a P2 hero focal-point drift; the woman/peacock composition sat approximately 6–8px too far right. Fixed the hero background position from centered to `calc(50% - 8px) 50%`.
-- Pass 2 (`jointown-comparison-pass2.png`): visual P0/P1/P2 issues were cleared, but interaction testing found a P1 missing callback on the center card body. Passed `onJointownOpen` through the fan-card component and raised the center frame to `z-index: 11` so its arrow owns the hover/click hit area above carousel hit zones.
-- Final (`jointown-comparison-final.png`): source and implementation align across the full view and focused top region; center-card entry, arrow entry, close, and return navigation all work.
+1. P2 — Outer cards exceeded the carousel edge and the fan was too flat.
+   - Fix: reduced horizontal step from 8.67 to 8.3 and increased scale falloff from 0.08 to 0.10.
+   - Post-fix evidence: outer-left begins at 408.50px against a 401.47px layer edge; outer-right ends at 1363.50px against a 1370.53px layer edge. Both are fully visible and symmetrically inset.
+2. P2 — Card titles remained at the bottom and the radius was smaller than the reference.
+   - Fix: moved titles to the upper-left, added a restrained top readability fade, and increased the card radius to 40px.
+   - Post-fix evidence: the final screenshot shows upper-left titles and consistent rounded corners across all five cards.
 
-**Follow-up Polish**
+## Findings
 
-- P3 only: native browser font/raster antialiasing may vary slightly by display scaling.
+No actionable P0, P1, or P2 mismatches remain for the requested carousel style-and-position scope.
+
+## Follow-up polish
+
+- P3: The reference uses illustrated game art while the portfolio intentionally retains portrait artwork; this is content-specific and not a layout mismatch.
 
 final result: passed

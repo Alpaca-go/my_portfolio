@@ -23,9 +23,9 @@ const cards = [
     tabColor: "#AB9AFB",
     panelGradient: "linear-gradient(121.8deg, #9f8cf0 4.71%, #7a65dd 92.19%)",
     sheetImages: [
-      { src: "/assets/brand-carousel-71.png", alt: "Feng Tang Tang brand design" },
-      { src: "/assets/brand-carousel-16.png", alt: "Chudao Xiang cuisine brand design" },
-      { src: "/assets/brand-carousel-32.png", alt: "Yi Ji Liang Fang brand design" }
+      { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/ed7b1c40-3332-43d8-a9eb-4615ef341b00/w=800", alt: "Lucas Martin" },
+      { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/7d4d2641-d6a8-4fef-e85c-b12ed100d500/w=800", alt: "James Walker" },
+      { src: "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/933a7615-f4b6-4eae-8ed1-705fa0e24400/w=800", alt: "Olivia Carter" }
     ],
     style: {
       left: "50%",

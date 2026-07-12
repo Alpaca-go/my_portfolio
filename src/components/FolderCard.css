@@ -27,7 +27,7 @@
   width: 452px;
   height: 264px;
   background: #ddd;
-  border: 5px solid #fff;
+  border: 0;
   border-radius: 20px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
   transform: translateX(-50%);

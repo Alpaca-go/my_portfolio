@@ -382,7 +382,7 @@ body {
   top: 54px;
   width: 320px;
   height: 220px;
-  border: 5px solid #fff;
+  border: 0;
   border-radius: 18px;
   background: #fff;
   box-shadow: 0 -2px 7px rgba(0, 0, 0, 0.18);
@@ -683,7 +683,7 @@ body {
   padding: 0;
   width: var(--card-width);
   height: var(--card-height);
-  border: 2px solid #fff;
+  border: 0;
   border-radius: 32px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
   overflow: hidden;
@@ -919,7 +919,16 @@ body {
   transition-delay: 0ms;
 }
 
-.brand-detail.is-card-transitioning:not(.is-project-transitioning) .brand-detail__fan-card--motion-target,
+.brand-detail.is-card-transitioning:not(.is-project-transitioning) .brand-detail__fan-card--motion-target {
+  visibility: hidden;
+}
+
+.brand-detail.has-pinned-carousel .brand-detail__fan-card--motion-target {
+  visibility: visible;
+  opacity: 0 !important;
+  transition: none !important;
+}
+
 .brand-detail.is-project-transitioning .brand-detail__fan-card--center {
   visibility: hidden;
 }
@@ -1010,7 +1019,7 @@ body {
   z-index: 7;
   --card-width: 360px;
   --card-height: 360px;
-  border: 2px solid #fff;
+  border: 0;
   border-radius: 32px;
   background: #f6f6f6;
   --card-rotate: 0deg;
@@ -1294,6 +1303,12 @@ body {
   isolation: isolate;
 }
 
+.card-transition-layer:not(.card-transition-layer--project) {
+  perspective: 1600px;
+  perspective-origin: 1280px 1120px;
+  transform-style: preserve-3d;
+}
+
 .card-transition-layer--project {
   z-index: 100;
 }
@@ -1315,6 +1330,7 @@ body {
     width var(--motion-duration, 860ms) var(--transition-delay) cubic-bezier(0.19, 1, 0.22, 1),
     height var(--motion-duration, 860ms) var(--transition-delay) cubic-bezier(0.19, 1, 0.22, 1),
     transform var(--motion-duration, 860ms) var(--transition-delay) cubic-bezier(0.19, 1, 0.22, 1),
+    transform-origin var(--motion-duration, 860ms) var(--transition-delay) cubic-bezier(0.19, 1, 0.22, 1),
     border-width var(--motion-duration, 860ms) var(--transition-delay) cubic-bezier(0.19, 1, 0.22, 1),
     border-radius var(--motion-duration, 860ms) var(--transition-delay) cubic-bezier(0.19, 1, 0.22, 1),
     background-color 520ms calc(var(--transition-delay) + 260ms) ease,
@@ -1412,11 +1428,12 @@ body {
   background: var(--target-background);
   box-shadow: var(--target-shadow, 0 2px 10px rgba(0, 0, 0, 0.35));
   opacity: var(--target-opacity, 1);
-  transform: translateZ(0) rotate(var(--target-rotate)) !important;
+  transform: var(--target-transform, translateZ(0) rotate(var(--target-rotate))) !important;
+  transform-origin: var(--target-transform-origin, 0 0);
 }
 
 .card-transition-layer.is-active .card-transition-layer__card::after {
-  background: rgba(255, 255, 255, var(--target-overlay, 0));
+  background: rgba(var(--target-overlay-color, 255, 255, 255), var(--target-overlay, 0));
 }
 
 .card-transition-layer.is-active .card-transition-layer__card-image {
