@@ -304,7 +304,7 @@ body {
 }
 
 .collection-card.is-opening[data-card-key="Brand Design"] {
-  transform: translateY(-40px);
+  transform: translateY(0);
   transition: none;
   animation: collection-card-brand-fade-down 520ms 320ms cubic-bezier(0.35, 0, 0.2, 1) forwards;
 }
@@ -342,7 +342,7 @@ body {
 @keyframes collection-card-brand-fade-down {
   0% {
     opacity: 1;
-    transform: translateY(-40px);
+    transform: translateY(0);
   }
 
   100% {

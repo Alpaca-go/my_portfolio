@@ -1,43 +1,66 @@
-# Design QA — Five-card carousel fan
+# Design QA — Brand detail title region
 
-- Source visual truth: `F:\Portfolio\765b38bffb45294a163f2a0d0f571615.jpg`
-- Implementation screenshot: `F:\my_portfolio\qa-carousel-implementation.png`
-- Viewport: 1772 × 1530
-- State: Brand Design detail, initial five-card carousel after the folder fly-out completes
-- Primary interaction tested: click the inner-right card; Olivia Carter moved to the center and the pinned fly-out layer released
-- Console errors: none
+- Source visual truth: `C:\Users\Administrator\AppData\Local\Temp\codex-clipboard-998c8f8d-aad8-402c-b807-49c166489053.png`
+- Paper reference: `C:\Users\Administrator\Desktop\title.jsx`
+- Final implementation screenshot: `F:\my_portfolio\qa-title-final.png`
+- Final side-by-side comparison: `F:\my_portfolio\qa-title-comparison-final.png`
+- Viewport: 2560 × 1360; comparison crop is the 2560 × 650 title region below the 80px Topbar
+- State: Brand Design detail page after the folder-to-carousel transition
 
 ## Full-view comparison evidence
 
-The source and implementation were opened together and compared in the same review input. The implementation preserves the existing portfolio page while matching the reference carousel composition: one dominant upright center card, two overlapping inner cards, two smaller outer cards, symmetric fan rotation, descending top edges, and a shared bottom baseline.
+The supplied PNG is a transparent 2560 × 1280 title-layer export. It was composited over the implementation page background and compared beside the browser-rendered title crop. The carousel was excluded from the comparison crop because the requested scope explicitly says not to change it.
 
-## Focused region comparison evidence
+## Focused-region comparison evidence
 
-A focused carousel-region capture was used because the reference image describes the five-card fan rather than the surrounding portfolio page. Card bounds were also measured in the rendered browser. The outer cards remain inside the carousel edges, the center card has the highest stacking level, and the two side levels use symmetric scale and rotation values.
+Focused pixel-bound measurements were used for all four title layers. In the final capture their visible bounds match the PNG:
+
+- English title: 600 × 95px at x=983, y=306
+- Chinese title: 202 × 51px at x=1184, y=448
+- Gradient pill: 306 × 36px at x=1130, y=527
+- English caption: 331 × 15px at x=1118, y=576
 
 ## Required fidelity surfaces
 
-- Fonts and typography: existing portfolio typography is intentionally retained; card titles now occupy the reference-aligned upper-left position with a readable 24px weight.
-- Spacing and layout rhythm: passed. Five cards overlap in a compact fan; outer cards sit inside the layer edges; top offsets and bottom alignment follow the reference hierarchy.
-- Colors and visual tokens: passed for the requested scope. Existing portrait imagery and page palette are retained while the reference's clean, borderless card treatment is preserved.
-- Image quality and asset fidelity: passed. Existing full-resolution carousel images are used with cover cropping; no placeholder or generated substitute is present.
-- Copy and content: passed for the requested scope. Existing carousel names remain intact and legible.
+- Fonts and typography: Zona Pro and HarmonyOS Sans project fonts are retained. Optical width and font-metric offsets were calibrated against the PNG.
+- Spacing and layout rhythm: English title, localized title, pill, and caption match the source center axis and measured vertical positions.
+- Colors and visual tokens: `#111111`, `#000000`, `#6e6e6e`, and the existing purple gradient match the supplied source/Paper reference.
+- Image quality and asset fidelity: no raster imagery is present in the scoped title region; the supplied PNG was used only as visual truth, not substituted into the UI.
+- Copy and content: “Brand Design”, “品牌设计”, “让品牌拥有清晰的视觉语言”, and “Turning ideas into memorable visual identities” match the source.
 
 ## Comparison history
 
-1. P2 — Outer cards exceeded the carousel edge and the fan was too flat.
-   - Fix: reduced horizontal step from 8.67 to 8.3 and increased scale falloff from 0.08 to 0.10.
-   - Post-fix evidence: outer-left begins at 408.50px against a 401.47px layer edge; outer-right ends at 1363.50px against a 1370.53px layer edge. Both are fully visible and symmetrically inset.
-2. P2 — Card titles remained at the bottom and the radius was smaller than the reference.
-   - Fix: moved titles to the upper-left, added a restrained top readability fade, and increased the card radius to 40px.
-   - Post-fix evidence: the final screenshot shows upper-left titles and consistent rounded corners across all five cards.
+### Pass 1 — blocked
+
+- P1: The previous implementation omitted the English “Brand Design” layer and included an unrelated project counter.
+- P2: The remaining title layers used different hierarchy, widths, weights, and vertical spacing.
+- Fix: introduced `DetailTitleBlock`, restored the four source layers, removed the counter, and applied the Paper layer structure.
+- Evidence: `F:\my_portfolio\qa-title-comparison-pass1.png`.
+
+### Pass 2 — blocked
+
+- P2: English title was 13px wider and 8px lower than the PNG; Chinese title was 3px lower and 3px taller; caption was 10px wider.
+- Fix: calibrated horizontal optical scales, font weight, local group offset, and individual baselines.
+- Evidence: `F:\my_portfolio\qa-title-comparison-pass2.png`.
+
+### Pass 3 — blocked
+
+- P2: English title, pill, and caption matched; Chinese title retained a 1px baseline mismatch.
+- Fix: moved only the Chinese title baseline by 1px without changing flow or the carousel.
+- Evidence: `F:\my_portfolio\qa-title-pass3.png`.
+
+### Final pass — passed
+
+- No actionable P0, P1, or P2 differences remain in the scoped title region.
+- Browser checks: title visible, carousel still visible, return-button hover still reaches `rgb(101, 28, 209)`, and no console or page errors were recorded.
+- Build: `npm run build` passed.
 
 ## Findings
 
-No actionable P0, P1, or P2 mismatches remain for the requested carousel style-and-position scope.
+No actionable mismatches remain. The final side-by-side comparison and pixel-bound measurements agree on layout, typography bounds, color treatment, spacing, and copy.
 
 ## Follow-up polish
 
-- P3: The reference uses illustrated game art while the portfolio intentionally retains portrait artwork; this is content-specific and not a layout mismatch.
+None required for the requested title-only scope.
 
 final result: passed

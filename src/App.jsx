@@ -3,7 +3,6 @@ import BrandDetailPage from "./components/BrandDetailPage";
 import CollectionShowcase from "./components/CollectionShowcase";
 import ChudaoDetailPage from "./components/FengTangDetailPage";
 import JointownDetailPage from "./components/JointownDetailPage";
-import HomeSections from "./components/HomeSections";
 import { GlobalHeader } from "./components/SiteChrome";
 
 const criticalImages = [
@@ -14,7 +13,9 @@ const criticalImages = [
 
 const HERO_MAX_WIDTH = 1440;
 const HERO_MAX_LIFT = 72;
-const HERO_CONTENT_SCALE = 1.5;
+const HERO_CONTENT_BOTTOM = 1400;
+const HERO_BOTTOM_GUTTER = 32;
+const HERO_SIDE_GUTTER = 24;
 
 const badgeData = [
   {
@@ -671,16 +672,19 @@ export default function App() {
 
   React.useLayoutEffect(() => {
     const updateStage = () => {
-      const availableHeight = Math.max(640, Math.min(window.innerHeight - 80, 980));
+      const headerHeight = window.innerWidth <= 767 ? 68 : 80;
+      const availableHeight = Math.max(320, window.innerHeight - headerHeight);
       const scale = Math.min(window.innerWidth / 2560, availableHeight / 1280);
-      const renderedCanvasWidth = 2560 * scale;
-      const responsiveHeroScale = Math.min(1, HERO_MAX_WIDTH / renderedCanvasWidth);
-      const heroScale = responsiveHeroScale * HERO_CONTENT_SCALE;
-      const heroLift = Math.min(HERO_MAX_LIFT, Math.max(36, window.innerHeight * 0.06));
+      const horizontalFit = Math.max(0.1, (window.innerWidth - HERO_SIDE_GUTTER * 2) / HERO_MAX_WIDTH);
+      const verticalFit = Math.max(0.1, (availableHeight - HERO_BOTTOM_GUTTER) / HERO_CONTENT_BOTTOM);
+      const fittedHeroScale = Math.min(1, horizontalFit, verticalFit);
+      const heroScale = fittedHeroScale / scale;
+      const heroLift = Math.min(HERO_MAX_LIFT, Math.max(12, availableHeight * 0.035));
+      const stageTop = (availableHeight - 1280 * scale) / 2;
       setStageStyle({
         "--stage-scale": scale,
         "--stage-left": `${(window.innerWidth - 2560 * scale) / 2}px`,
-        "--stage-top": `${(availableHeight - 1280 * scale) / 2}px`,
+        "--stage-top": `${stageTop}px`,
         "--hero-scale": heroScale,
         "--hero-translate-y": `${-heroLift / scale}px`
       });
@@ -1051,17 +1055,6 @@ export default function App() {
     setTransitionActive(false);
   }, []);
 
-  const handleSelectedProjectOpen = (action) => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-    if (action === "jointown" || action === "chudao") {
-      clearTimers();
-      setSelectedCard({ key: "brand", label: "Brand Design" });
-      setProjectDetail(action);
-      return;
-    }
-    handleCardOpen("brand", "Brand Design");
-  };
-
   const hasDetail = Boolean(openingKey || detailVisible || detailClosing || projectDetail || projectTransitioning);
   const activeCategory = selectedCard?.key === "packaging"
     ? "包装设计"
@@ -1119,9 +1112,6 @@ export default function App() {
         ) : null}
       </div>
       </div>
-      {!hasDetail ? (
-        <HomeSections onProjectOpen={handleSelectedProjectOpen} onCategoryOpen={handleCardOpen} />
-      ) : null}
     </div>
   );
 }

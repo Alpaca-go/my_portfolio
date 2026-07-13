@@ -73,16 +73,19 @@ function getWrappedCard(index) {
 
 const detailCopyByKey = {
   packaging: {
+    titleEn: "Packaging Design",
     title: "包装设计",
     pill: "从概念到落地，构建完整包装系统",
     caption: "From concept to production-ready packaging"
   },
   brand: {
+    titleEn: "Brand Design",
     title: "品牌设计",
     pill: "让品牌拥有清晰的视觉语言",
     caption: "Turning ideas into memorable visual identities"
   },
   ip: {
+    titleEn: "IP Design",
     title: "IP 设计",
     pill: "创造能够持续成长的品牌角色",
     caption: "Designing characters that grow with brands"
@@ -108,10 +111,6 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
   const carouselTimerRef = React.useRef(null);
   const dragStartRef = React.useRef(null);
   const detailCopy = detailCopyByKey[activeCardKey] ?? detailCopyByKey.brand;
-  const centerCard = getWrappedCard(activeIndex);
-  const isChudaoActive = centerCard.key === "brand-16";
-  const isJointownActive = centerCard.key === "brand-44";
-  const centerProjectOpen = isChudaoActive ? onChudaoOpen : isJointownActive ? onJointownOpen : null;
   const isInteractionDisabled = Boolean(carouselDirection || isCardTransitioning || isClosing);
   const classes = [
     "brand-detail",
@@ -168,8 +167,6 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
     slideCarousel(delta > 0 ? "previous" : "next");
   };
 
-  const normalizedActiveIndex = ((activeIndex % carouselCards.length) + carouselCards.length) % carouselCards.length;
-
   return (
     <>
       <main className={classes} data-active-card={activeCardKey} aria-hidden={!isVisible}>
@@ -206,23 +203,31 @@ export default function BrandDetailPage({ activeCardKey = "brand", isVisible = t
           onInteract={onCarouselInteract}
         />
         <div className="brand-detail__copy">
-          <span className="brand-detail__project-count">{String(normalizedActiveIndex + 1).padStart(2, "0")} / {String(carouselCards.length).padStart(2, "0")} PROJECTS</span>
-          <h1>
-            <DetailTitle title={detailCopy.title} />
-          </h1>
-          <div className="brand-detail__pill">{detailCopy.pill}</div>
-          <p>{detailCopy.caption}</p>
-          {centerProjectOpen ? (
-            <button className="brand-detail__view-project" type="button" onClick={centerProjectOpen} disabled={isInteractionDisabled}>
-              <span>View Project</span><span>查看项目</span>
-            </button>
-          ) : null}
+          <DetailTitleBlock copy={detailCopy} />
         </div>
-        <button className="brand-detail__down" aria-label="Back to works" onClick={onBack}>
+        <button className="brand-detail__down" aria-label="返回作品" onClick={onBack}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 19V5M12 5L6.5 10.5M12 5L17.5 10.5" />
+          </svg>
           <span>Back to Works</span><span>返回作品</span>
         </button>
         </section>
       </main>
     </>
+  );
+}
+
+function DetailTitleBlock({ copy }) {
+  return (
+    <div className="brand-detail__title-block">
+      <h1>{copy.titleEn}</h1>
+      <div className="brand-detail__title-localized">
+        <h2><DetailTitle title={copy.title} /></h2>
+        <div className="brand-detail__title-meta">
+          <div className="brand-detail__pill">{copy.pill}</div>
+          <p>{copy.caption}</p>
+        </div>
+      </div>
+    </div>
   );
 }
