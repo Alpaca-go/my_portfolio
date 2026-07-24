@@ -201,6 +201,24 @@ a:focus-visible,
   transform-origin: 0 0;
   background: var(--page-bg);
   will-change: transform;
+  overflow: visible;
+}
+
+.page-shell.has-detail .page-canvas {
+  --effective-stage-top: 0px;
+  overflow: hidden;
+}
+
+.page-shell.has-detail .collection-showcase {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease, visibility 300ms;
+}
+
+.page-shell.has-detail.is-returning .collection-showcase {
+  opacity: 1;
+  visibility: visible;
 }
 
 .hero {
@@ -427,7 +445,7 @@ a:focus-visible,
   min-height: 360px;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
   outline: none;
 }
 

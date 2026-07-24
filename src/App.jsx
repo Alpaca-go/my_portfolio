@@ -1056,6 +1056,7 @@ export default function App() {
   }, []);
 
   const hasDetail = Boolean(openingKey || detailVisible || detailClosing || projectDetail || projectTransitioning);
+  const isReturning = Boolean(closingKey);
   const activeCategory = selectedCard?.key === "packaging"
     ? "包装设计"
     : selectedCard?.key === "ip"
@@ -1063,7 +1064,7 @@ export default function App() {
       : "品牌设计";
 
   return (
-    <div className={`page-shell ${hasDetail ? "has-detail" : "is-home"} ${projectDetail ? "project-detail-active" : ""}`} id="top">
+    <div className={`page-shell ${hasDetail ? "has-detail" : "is-home"} ${projectDetail ? "project-detail-active" : ""} ${isReturning ? "is-returning" : ""}`} id="top">
       <GlobalHeader isDetail={hasDetail} activeCategory={activeCategory} onNavigateHome={resetToHome} />
       <div className="page-stage">
       <div className="page-canvas" style={stageStyle}>
